@@ -7,7 +7,12 @@ const list = [
   ['2', '3', '4'],
   ['3', '4', '5'],
   ['4', '5', '6'],
-  // ['6', '1', '2'], // 拿掉這行和加上去的時候執行的結果怪怪的: 沒有顯示出這個好機會
+
+  // chance
+  // ['6', '1', '2'],
+  // ['1', '5', '6'],
+  // ['6', '5', '1'],
+  // ['3', '2', '1'],
 ]
 
 /**
@@ -50,7 +55,7 @@ function start() {
   const allCombinations = unFilteredCombinations.filter((skills) => skills.length === purpose)
 
   // 是否成功
-  const success = allCombinations.some((combination) => {
+  allCombinations.forEach((combination) => {
     // 計算出每一個排列組合所囊誇的技能總數
     const combinationCount = _countSkillsOfEach(combination)
 
@@ -58,11 +63,9 @@ function start() {
     const successCombination = Object.keys(combinationCount).every((skill) => combinationCount[skill] === 2)
 
     if (successCombination) passList.push(combination)
-
-    return !!successCombination // 這個是最外面 .some 的那個
   })
 
-  if (success) return void console.log('你成功啦', passList)
+  if (passList.length !== 0) return void console.log('你成功啦', passList)
 
   // 計算一下還差哪顆
   const missOneList = unFilteredCombinations.filter((skills) => skills.length === purpose - 1)
