@@ -7,7 +7,7 @@ const list = [
   ['2', '3', '4'],
   ['3', '4', '5'],
   ['4', '5', '6'],
-  ['6', '1', '2'], // 拿掉這行和加上去的時候執行的結果怪怪的: 沒有顯示出這個好機會
+  // ['6', '1', '2'], // 拿掉這行和加上去的時候執行的結果怪怪的: 沒有顯示出這個好機會
 ]
 
 /**
@@ -67,7 +67,7 @@ function start() {
   // 計算一下還差哪顆
   const missOneList = unFilteredCombinations.filter((skills) => skills.length === purpose - 1)
 
-  const onlyMissOne = missOneList.some((conbinationList) => {
+  const chanceList = missOneList.reduce((chanceList, conbinationList) => {
     const conbinationCount = _countSkillsOfEach(conbinationList)
 
     // 整理: { [相同技能數量的技能數]: { count: 幾個技能的技能數量是這個n, skillList: [是哪些技能] } }
@@ -85,7 +85,7 @@ function start() {
     // 如果沒有一個技能是只有 1 個的話，後面不用處理
     // ex: [ '共鳴', '魔咒', '藝術' ], [ '魔咒', '衝刺', '共鳴' ], [ '共鳴', '藝術', '衝刺' ]
     // 其中 { 共鳴: 3, 魔咒: 2, 藝術: 2, 衝刺: 2 }
-    if (skillCount[1] == null) return false
+    if (skillCount[1] == null) return
 
     // 如果剛好只數到 1 個的技能有 3 個的話，就代表只剩這顆。
     if (skillCount[1].count === 3) {
@@ -96,16 +96,18 @@ function start() {
         .map((conbination) => conbination[0])
         .find((startSkill) => skillCount[1].skillList.find((count1Skill) => startSkill === count1Skill))
       console.log(`開頭不能是 ${firstSkill} 的 [${skillCount[1].skillList.join(', ')}]`)
+      console.log('')
 
-      return true
+      chanceList.push({
+        firstCannot: firstSkill,
+        neededOne: skillCount[1].skillList,
+      })
     }
 
-    return false
-  })
+    return chanceList
+  }, [])
 
-  if (!onlyMissOne) {
-    console.log('很可惜都沒有，也沒有只差一顆的')
-  }
+  if (chanceList.length === 0) console.log('很可惜都沒有，也沒有只差一顆的')
 }
 
 start()
