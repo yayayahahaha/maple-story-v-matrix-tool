@@ -42,7 +42,7 @@ function _checkHasStartWithSame(list) {
     if (map[items[0]] != null) return true
     map[items[0]] = true
 
-    return { result, map }
+    return map
   }, {})
 }
 
