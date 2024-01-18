@@ -17,11 +17,11 @@ const list = [
 ]
 
 function start() {
-  const yesList = []
+  const passList = []
 
   const allCombinations = uniqueCombinationOfArray(list).filter((item) => item.length === purpose)
 
-  const hasYes = allCombinations.some((combination) => {
+  const success = allCombinations.some((combination) => {
     // 計算出每一個排列組合所囊誇的技能總數
     const combinationCount = combination.reduce((acc, skills) => {
       skills.forEach((skill) => {
@@ -31,12 +31,12 @@ function start() {
       return acc
     }, {})
 
-    // console.log(JSON.stringify(combinationCount, null, 2))
-
-    // 判斷是不是每個都有兩個, 有的話接著判斷不可以有同個開頭的
-    const yes = Object.keys(combinationCount).every((skill) => {
+    // 判斷是不是每個技能都有兩個, 有的話接著判斷不可以有同個開頭的
+    const successCombination = Object.keys(combinationCount).every((skill) => {
+      // 檢查兩個
       if (combinationCount[skill] !== 2) return false
 
+      // 檢查開頭是不是一樣的
       for (let i = 0; i < combination.length; i++) {
         const previous = combination[i]
         for (let j = 0; j < combination.length; j++) {
@@ -50,12 +50,12 @@ function start() {
       return true
     })
 
-    if (yes) yesList.push(combination)
+    if (successCombination) passList.push(combination)
 
-    return yes
+    return !!successCombination // 這個是最外面 .some 的那個
   })
 
-  if (hasYes) return void console.log('你成功啦', yesList)
+  if (success) return void console.log('你成功啦', passList)
 
   // 計算一下還差哪顆
   const missOneList = uniqueCombinationOfArray(list).filter((item) => item.length === purpose - 1)
@@ -121,6 +121,7 @@ function start() {
 start()
 
 // https://blog.pulipuli.info/2011/01/print-all-unique-combination-of-array.html
+// TODO 改寫成自己的版本，可以直接重寫沒關係
 function uniqueCombinationOfArray(_array) {
   var _combination = []
 
