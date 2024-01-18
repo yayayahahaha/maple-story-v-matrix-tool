@@ -2,7 +2,7 @@
 
 const purpose = 4
 
-const list = [
+const list2 = [
   ['共鳴', '魔咒', '藝術'],
   ['魔咒', '衝刺', '共鳴'],
   ['突襲', '綻放', '共鳴'],
@@ -14,6 +14,13 @@ const list = [
   // ['共鳴', '魔咒', '藝術'],
   // ['魔咒', '衝刺', '藝術'],
   // ['藝術', '衝刺', '綻放'],
+]
+
+const list = [
+  [1, 2, 3],
+  [3, 2, 1],
+  [4, 5, 6],
+  // [6, 7, 8],
 ]
 
 /**
@@ -37,9 +44,9 @@ function _countSkillsOfEach(list) {
 function _checkHasStartWithSame(list) {
   // TODO 檢查 input 格式
 
-  return list.reduce((map, items) => {
-    if (map === false) return true
-    if (map[items[0]] != null) return true
+  return !list.reduce((map, items) => {
+    if (map === true) return false
+    if (map[items[0]] != null) return false
     map[items[0]] = true
 
     return map
@@ -49,33 +56,19 @@ function _checkHasStartWithSame(list) {
 function start() {
   const passList = []
 
-  const unFilterCombinations = uniqueCombinationOfArray(list)
-  const allCombinations = unFilterCombinations.filter((skills) => {
-    return skills.length === purpose && !_checkHasStartWithSame(skills)
-  })
+  // 過濾出開頭一樣的組合
+  const unFilteredCombinations = uniqueCombinationOfArray(list).filter((skills) => !_checkHasStartWithSame(skills))
 
+  // 過濾出需求數目的組合 (四核六技 or 六核九技)
+  const allCombinations = unFilteredCombinations.filter((skills) => skills.length === purpose)
+
+  // 是否成功
   const success = allCombinations.some((combination) => {
     // 計算出每一個排列組合所囊誇的技能總數
     const combinationCount = _countSkillsOfEach(combination)
 
-    // 判斷是不是每個技能都有兩個, 有的話接著判斷不可以有同個開頭的
-    const successCombination = Object.keys(combinationCount).every((skill) => {
-      // 檢查兩個
-      if (combinationCount[skill] !== 2) return false
-
-      // 檢查開頭是不是一樣的
-      for (let i = 0; i < combination.length; i++) {
-        const previous = combination[i]
-        for (let j = 0; j < combination.length; j++) {
-          if (i === j) continue
-          const current = combination[j]
-
-          if (previous[0] === current[0]) return false
-        }
-      }
-
-      return true
-    })
+    // 判斷是不是每個技能都有兩個
+    const successCombination = Object.keys(combinationCount).every((skill) => combinationCount[skill] === 2)
 
     if (successCombination) passList.push(combination)
 
@@ -85,7 +78,7 @@ function start() {
   if (success) return void console.log('你成功啦', passList)
 
   // 計算一下還差哪顆
-  const missOneList = unFilterCombinations.filter((item) => item.length === purpose - 1)
+  const missOneList = unFilteredCombinations.filter((skills) => skills.length === purpose - 1)
 
   missOneList.forEach((conbinationList) => {
     const conbinationCount = _countSkillsOfEach(conbinationList)
@@ -102,40 +95,22 @@ function start() {
       return map
     }, {})
 
-    // 如果沒有一個技能是只有一個的話，後面不用處理
+    // 如果沒有一個技能是只有 1 個的話，後面不用處理
     // ex: [ '共鳴', '魔咒', '藝術' ], [ '魔咒', '衝刺', '共鳴' ], [ '共鳴', '藝術', '衝刺' ]
     // 其中 { 共鳴: 3, 魔咒: 2, 藝術: 2, 衝刺: 2 }
     if (skillCount[1] == null) return
 
-    // 如果剛好只數到 1 個的技能有 3 個的話，有機會只剩這顆。
-    // 接下來要檢查的是這個組合裡面有沒有第一個技能是一樣的
+    // 如果剛好只數到 1 個的技能有 3 個的話，就代表只剩這顆。
     if (skillCount[1].count === 3) {
-      // first not equal
-      const firstNotEqual = conbinationList.every((conbination, i) => {
-        const previous = conbination[0]
+      console.log('好機會!')
+      console.log(conbinationList)
 
-        for (let j = 0; j < conbinationList.length; j++) {
-          if (i === j) continue
-          const current = conbinationList[j][0]
+      const firstSkill = conbinationList
+        .map((conbination) => conbination[0])
+        .find((startSkill) => skillCount[1].skillList.find((count1Skill) => startSkill === count1Skill))
+      console.log(`開頭不能是 ${firstSkill} 的 [${skillCount[1].skillList.join(', ')}]`)
 
-          if (current === previous) return false
-        }
-        return true
-      })
-      if (firstNotEqual) {
-        console.log('好機會!')
-        console.log(conbinationList)
-        // console.log(skillCount[1].skillList)
-        const a = conbinationList
-          .map((item) => item[0])
-          .find((item) => {
-            return skillCount[1].skillList.find((skill) => item === skill)
-          })
-        console.log(`頭不能是 ${a} 的 [${skillCount[1].skillList.join(', ')}]`)
-        console.log()
-
-        return
-      }
+      return
     }
   })
 }
