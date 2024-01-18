@@ -12,7 +12,7 @@ const list = [
   // ['6', '1', '2'],
   // ['1', '5', '6'],
   // ['6', '5', '1'],
-  // ['3', '2', '1'],
+  ['3', '2', '1'],
 ]
 
 /**
@@ -98,7 +98,12 @@ function start() {
       const firstSkill = conbinationList
         .map((conbination) => conbination[0])
         .find((startSkill) => skillCount[1].skillList.find((count1Skill) => startSkill === count1Skill))
-      console.log(`開頭不能是 ${firstSkill} 的 [${skillCount[1].skillList.join(', ')}]`)
+
+      if (firstSkill == null) {
+        console.log(`開頭可以是任一技能的 [${skillCount[1].skillList.join(', ')}]`)
+      } else {
+        console.log(`開頭不能是 ${firstSkill} 的 [${skillCount[1].skillList.join(', ')}]`)
+      }
       console.log('')
 
       chanceList.push({
