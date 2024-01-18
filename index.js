@@ -16,20 +16,47 @@ const list = [
   // ['藝術', '衝刺', '綻放'],
 ]
 
+/**
+ * @function _countSkillsOfEach
+ * @TODO document
+ * */
+function _countSkillsOfEach(list) {
+  return list.reduce((acc, skills) => {
+    skills.forEach((skill) => {
+      acc[skill] = acc[skill] || 0
+      acc[skill]++
+    })
+    return acc
+  }, {})
+}
+
+/**
+ * @function _checkHasStartWithSame
+ * @TODO document
+ * */
+function _checkHasStartWithSame(list) {
+  // TODO 檢查 input 格式
+
+  return list.reduce((map, items) => {
+    if (map === false) return true
+    if (map[items[0]] != null) return true
+    map[items[0]] = true
+
+    return { result, map }
+  }, {})
+}
+
 function start() {
   const passList = []
 
-  const allCombinations = uniqueCombinationOfArray(list).filter((item) => item.length === purpose)
+  const unFilterCombinations = uniqueCombinationOfArray(list)
+  const allCombinations = unFilterCombinations.filter((skills) => {
+    return skills.length === purpose && !_checkHasStartWithSame(skills)
+  })
 
   const success = allCombinations.some((combination) => {
     // 計算出每一個排列組合所囊誇的技能總數
-    const combinationCount = combination.reduce((acc, skills) => {
-      skills.forEach((skill) => {
-        acc[skill] = acc[skill] || 0
-        acc[skill]++
-      })
-      return acc
-    }, {})
+    const combinationCount = _countSkillsOfEach(combination)
 
     // 判斷是不是每個技能都有兩個, 有的話接著判斷不可以有同個開頭的
     const successCombination = Object.keys(combinationCount).every((skill) => {
@@ -58,21 +85,12 @@ function start() {
   if (success) return void console.log('你成功啦', passList)
 
   // 計算一下還差哪顆
-  const missOneList = uniqueCombinationOfArray(list).filter((item) => item.length === purpose - 1)
+  const missOneList = unFilterCombinations.filter((item) => item.length === purpose - 1)
+
   missOneList.forEach((conbinationList) => {
-    const conbinationCount = conbinationList.reduce((map, skills) => {
-      skills.forEach((skill) => {
-        map[skill] = map[skill] || 0
-        map[skill]++
-      })
+    const conbinationCount = _countSkillsOfEach(conbinationList)
 
-      return map
-    }, {})
-
-    console.log('')
-    console.log('conbinationList:', conbinationList)
-    console.log('conbinationCount:', conbinationCount)
-
+    // 整理: { [相同技能數量的技能數]: { count: 幾個技能的技能數量是這個n, skillList: [是哪些技能] } }
     const skillCount = Object.keys(conbinationCount).reduce((map, skill) => {
       map[conbinationCount[skill]] = map[conbinationCount[skill]] || {
         count: 0,
@@ -84,8 +102,13 @@ function start() {
       return map
     }, {})
 
-    console.log('skillCount:', skillCount)
+    // 如果沒有一個技能是只有一個的話，後面不用處理
+    // ex: [ '共鳴', '魔咒', '藝術' ], [ '魔咒', '衝刺', '共鳴' ], [ '共鳴', '藝術', '衝刺' ]
+    // 其中 { 共鳴: 3, 魔咒: 2, 藝術: 2, 衝刺: 2 }
+    if (skillCount[1] == null) return
 
+    // 如果剛好只數到 1 個的技能有 3 個的話，有機會只剩這顆。
+    // 接下來要檢查的是這個組合裡面有沒有第一個技能是一樣的
     if (skillCount[1].count === 3) {
       // first not equal
       const firstNotEqual = conbinationList.every((conbination, i) => {
@@ -115,7 +138,6 @@ function start() {
       }
     }
   })
-  // console.log('missOneList:', missOneList)
 }
 
 start()
