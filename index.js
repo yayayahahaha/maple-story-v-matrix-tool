@@ -6,9 +6,11 @@
 
 // 四核六技計算機
 
+import { v4 } from 'uuid'
+
 const purpose = 4
 const list = [
-  ['共鳴', '魔咒', '藝術'],
+  new VMatrixCore({ skills: ['共鳴', '魔咒', '藝術'], required: false }),
   ['共鳴', '衝刺', '綻放'],
   ['共鳴', '藝術', '衝刺'],
   ['共鳴', '綻放', '衝刺'],
@@ -29,10 +31,22 @@ export function vMatrixTool(originList, purpose) {
     return new VMatrixCore({ skills: item, required: false })
   })
 
+  // required 的核心 map
+  const requriedCoreMap = Object.fromEntries(list.filter((core) => core.required).map((item) => [item.id, item]))
+  const hasRequiredCore = Object.keys(requriedCoreMap).length !== 0
+  console.log(requriedCoreMap)
+
   const passList = []
 
-  // 過濾出開頭一樣的組合
-  const unFilteredCombinations = _uniqueCombinationOfArray(list).filter((skills) => !_checkHasStartWithSame(skills))
+  // 排除開頭一樣的組合 和沒有包含 requried 核心的組合
+  const unFilteredCombinations = _uniqueCombinationOfArray(list).filter((combination) => {
+    // 開頭
+    if (_checkHasStartWithSame(combination)) return false
+
+    // required
+    if (!hasRequiredCore) return true
+    return combination.some((core) => requriedCoreMap[core.id])
+  })
 
   // 過濾出需求數目的組合 (四核六技 or 六核九技)
   const allCombinations = unFilteredCombinations.filter((skills) => skills.length === purpose)
@@ -196,11 +210,12 @@ export function vMatrixTool(originList, purpose) {
 }
 /**
  * @function VMatrixCore
- * @TODO syntax check, document
+ * @TODO syntax check, document, make id cannot be overwrite with property and getter function
  * */
 export function VMatrixCore(config) {
   // skills
   // required
-  Object.assign(this, config)
+  const id = v4()
+  Object.assign(this, config, { id })
   return this
 }
