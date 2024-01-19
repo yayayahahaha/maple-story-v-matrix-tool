@@ -7,7 +7,6 @@
 // 四核六技計算機
 
 const purpose = 4
-
 const list = [
   ['共鳴', '魔咒', '藝術'],
   ['共鳴', '衝刺', '綻放'],
@@ -17,13 +16,19 @@ const list = [
   ['魔咒', '衝刺', '藝術'],
   ['魔咒', '衝刺', '共鳴'],
   ['突襲', '綻放', '共鳴'],
-  ['藝術', '突襲', '綻放'],
-  ['共鳴', '衝刺', '藝術'],
-  ['綻放', '魔咒', '衝刺'],
-  ['藝術', '魔咒', '突襲'],
+  // ['藝術', '突襲', '綻放'],
+  // ['共鳴', '衝刺', '藝術'],
+  // ['綻放', '魔咒', '衝刺'],
+  // ['藝術', '魔咒', '突襲'],
 ]
+vMatrixTool(list, purpose)
 
-function start() {
+export function vMatrixTool(originList, purpose) {
+  const list = originList.map((item) => {
+    if (item instanceof VMatrixCore) return item
+    return new VMatrixCore({ skills: item, required: false })
+  })
+
   const passList = []
 
   // 過濾出開頭一樣的組合
@@ -98,8 +103,8 @@ function start() {
    * @TODO document
    * */
   function _countSkillsOfEach(list) {
-    return list.reduce((acc, skills) => {
-      skills.forEach((skill) => {
+    return list.reduce((acc, core) => {
+      core.skills.forEach((skill) => {
         acc[skill] = acc[skill] || 0
         acc[skill]++
       })
@@ -116,7 +121,7 @@ function start() {
 
     return !list.reduce((map, items) => {
       if (map === true) return false
-      if (map[items[0]] != null) return false
+      if (map[items.skills[0]] != null) return false
       map[items[0]] = true
 
       return map
@@ -194,5 +199,13 @@ function start() {
     }
   }
 }
-
-start()
+/**
+ * @function VMatrixCore
+ * @TODO syntax check, document
+ * */
+export function VMatrixCore(config) {
+  // skills
+  // required
+  Object.assign(this, config)
+  return this
+}
