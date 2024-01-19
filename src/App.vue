@@ -144,7 +144,10 @@ export default {
         return
       }
 
-      this.targetCoreNumber = (function () {
+      this.targetCoreNumber = (() => {
+        // 凱殷 有夠特別
+        if (this.myJob === '凱殷') return 6
+
         switch (jobInfo.skills.length) {
           case 6:
             return 4
