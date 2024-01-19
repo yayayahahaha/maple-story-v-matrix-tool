@@ -1,53 +1,55 @@
 <template>
-  <el-row :gutter="15" class="container">
-    <el-col style="margin-bottom: 12px">
-      <h1>楓之谷 V 矩陣 核心工具</h1>
-      <h6>適用版本: Ver.2.58.3</h6>
-    </el-col>
+  <div class="outer">
+    <el-row :gutter="15" class="container">
+      <el-col style="margin-bottom: 12px">
+        <h1>楓之谷 V 矩陣 核心工具</h1>
+        <h6>適用版本: Ver.2.58.3</h6>
+      </el-col>
 
-    <el-col>
-      <el-form>
-        <el-form-item label="我的職業是">
-          <job-selector v-model="myJob" />
-        </el-form-item>
+      <el-col>
+        <el-form>
+          <el-form-item label="我的職業是">
+            <job-selector v-model="myJob" />
+          </el-form-item>
 
-        <el-form-item label="我想要湊">
-          <el-radio-group v-model="targetCoreNumber">
-            <el-radio :label="4">四核六技</el-radio>
-            <el-radio :label="6">六核九技</el-radio>
-          </el-radio-group>
-        </el-form-item>
+          <el-form-item label="我想要湊">
+            <el-radio-group v-model="targetCoreNumber">
+              <el-radio :label="4">四核六技</el-radio>
+              <el-radio :label="6">六核九技</el-radio>
+            </el-radio-group>
+          </el-form-item>
 
-        <el-form-item label="我想要的技能是">
-          <el-col>
-            <el-row v-for="(skillRow, rowIndex) in skills" :key="rowIndex" :gutter="15" style="margin-bottom: 20px">
-              <el-col :span="6" v-for="(skill, index) in skillRow" :key="index">
-                <el-input :placeholder="skill.placeholder" v-model="skill.label" :disabled="skill.disabled" />
-              </el-col>
-            </el-row>
-          </el-col>
-        </el-form-item>
-
-        <el-form-item label="我目前有的核心" />
-
-        <core-selector v-model="coreList" :skill-options="skills" />
-
-        <el-row>
-          <el-col>
+          <el-form-item label="我想要的技能是">
             <el-col>
-              <el-button style="width: 100%" type="success" @click="start">開始計算</el-button>
+              <el-row v-for="(skillRow, rowIndex) in skills" :key="rowIndex" :gutter="15" style="margin-bottom: 20px">
+                <el-col :span="6" v-for="(skill, index) in skillRow" :key="index">
+                  <el-input :placeholder="skill.placeholder" v-model="skill.label" :disabled="skill.disabled" />
+                </el-col>
+              </el-row>
             </el-col>
-          </el-col>
-        </el-row>
-      </el-form>
+          </el-form-item>
 
-      <el-divider></el-divider>
+          <el-form-item label="我目前有的核心" />
 
-      <success-text v-if="passList.length !== 0" :pass-list="passList" :skill-map="skillMap" />
-      <failed-text v-else-if="isFailed" />
-      <chance-text v-else-if="chancePayload.length !== 0" :chance-payload="chancePayload" :skill-map="skillMap" />
-    </el-col>
-  </el-row>
+          <core-selector v-model="coreList" :skill-options="skills" />
+
+          <el-row>
+            <el-col>
+              <el-col>
+                <el-button style="width: 100%" type="success" @click="start">開始計算</el-button>
+              </el-col>
+            </el-col>
+          </el-row>
+        </el-form>
+
+        <el-divider></el-divider>
+
+        <success-text v-if="passList.length !== 0" :pass-list="passList" :skill-map="skillMap" />
+        <failed-text v-else-if="isFailed" />
+        <chance-text v-else-if="chancePayload.length !== 0" :chance-payload="chancePayload" :skill-map="skillMap" />
+      </el-col>
+    </el-row>
+  </div>
 </template>
 
 <script>
@@ -195,7 +197,14 @@ export default {
   padding: 0px;
 }
 
+.outer {
+  width: 100%;
+  justify-content: center;
+  display: flex;
+}
+
 .container {
   padding: 15px;
+  max-width: 900px;
 }
 </style>
