@@ -56,7 +56,7 @@ import CoreSelector from './components/CoreSelector.vue'
 import SuccessText from './components/SuccessText.vue'
 import FailedText from './components/FailedText.vue'
 import ChanceText from './components/ChanceText.vue'
-import { FREE_JOB_TEXT, SUCCESS_STATUS, FAILED_STATUS, CHANCE_STATUS } from './dictionary'
+import { jobsMap, FREE_JOB_TEXT, SUCCESS_STATUS, FAILED_STATUS, CHANCE_STATUS } from './dictionary'
 import { vMatrixTool } from './utils'
 
 export default {
@@ -88,9 +88,7 @@ export default {
       .map((_, index) => ({
         value: `skill-${index + 1}`,
         placeholder: `技能 ${index + 1}`,
-        // TODO testing codes
-        label: `${index}`,
-        // label: '',
+        label: '',
         color: colorSet[index],
         disabled: false,
       }))
@@ -122,6 +120,27 @@ export default {
   },
 
   watch: {
+    myJob() {
+      const flatSkills = this.skills.flat()
+
+      if (this.myJob === FREE_JOB_TEXT) {
+        flatSkills.forEach((skill) => Object.assign(skill, { label: '' }))
+        return
+      }
+
+      const jobInfo = jobsMap[this.myJob]
+      if (jobInfo == null) {
+        alert('發生了奇怪的錯誤，可以先用手動輸入的嗎 🥲')
+        return
+      }
+
+      this.targetCoreNumber = Math.round((jobInfo.skills.length * 2) / 3)
+
+      jobInfo.skills.forEach((skill, index) => {
+        flatSkills[index].label = skill
+      })
+    },
+
     'coreList.length'() {
       this.resetStatus()
     },

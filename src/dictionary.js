@@ -9,11 +9,11 @@ export const jobs = [
     jobs: [
       {
         name: '夜使者',
-        cores: [],
+        skills: [],
       },
       {
         name: '影武者',
-        cores: ['修羅', '隱藏刀', '幻影劍', '穢土轉生', '短劍升天', '短劍護佑'],
+        skills: ['修羅', '隱藏刀', '幻影劍', '穢土轉生', '短劍升天', '短劍護佑'],
       },
     ],
   },
@@ -22,12 +22,13 @@ export const jobs = [
     jobs: [
       {
         name: '爆拳槍神',
-        cores: [],
+        skills: [],
       },
       {
         name: '煉獄巫師',
-        cores: [],
+        skills: [],
       },
     ],
   },
 ]
+export const jobsMap = Object.fromEntries(jobs.map((group) => group.jobs.map((job) => [job.name, job])).flat())
