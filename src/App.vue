@@ -1,53 +1,59 @@
 <template>
-  <el-row :gutter="15" class="container">
-    <el-col style="margin-bottom: 12px">
-      <h1>楓之谷 V 矩陣 核心工具</h1>
-      <h6>適用版本: Ver.2.58.3</h6>
-    </el-col>
+  <div class="outer">
+    <el-row :gutter="15" class="container">
+      <el-col style="margin-bottom: 12px">
+        <h1>楓之谷 V 矩陣 核心工具</h1>
+        <h6>適用版本: Ver.2.58.3 (2024/1)</h6>
+      </el-col>
 
-    <el-col>
-      <el-form>
-        <el-form-item label="我的職業是">
-          <job-selector v-model="myJob" />
-        </el-form-item>
+      <el-col>
+        <el-form>
+          <el-form-item label="我的職業是">
+            <job-selector v-model="myJob" />
+          </el-form-item>
 
-        <el-form-item label="我想要湊">
-          <el-radio-group v-model="targetCoreNumber">
-            <el-radio :label="4">四核六技</el-radio>
-            <el-radio :label="6">六核九技</el-radio>
-          </el-radio-group>
-        </el-form-item>
+          <el-form-item label="我想要湊">
+            <el-radio-group v-model="targetCoreNumber">
+              <el-radio :label="4">4 核 6 技</el-radio>
+              <el-radio :label="6">6 核 9 技</el-radio>
+            </el-radio-group>
+          </el-form-item>
 
-        <el-form-item label="我想要的技能是">
-          <el-col>
-            <el-row v-for="(skillRow, rowIndex) in skills" :key="rowIndex" :gutter="15" style="margin-bottom: 20px">
-              <el-col :span="6" v-for="(skill, index) in skillRow" :key="index">
-                <el-input :placeholder="skill.placeholder" v-model="skill.label" :disabled="skill.disabled" />
-              </el-col>
-            </el-row>
-          </el-col>
-        </el-form-item>
-
-        <el-form-item label="我目前有的核心" />
-
-        <core-selector v-model="coreList" :skill-options="skills" />
-
-        <el-row>
-          <el-col>
+          <el-form-item label="我想要的技能是">
             <el-col>
-              <el-button style="width: 100%" type="success" @click="start">開始計算</el-button>
+              <el-row v-for="(skillRow, rowIndex) in skills" :key="rowIndex" :gutter="15" style="margin-bottom: 20px">
+                <el-col :span="6" v-for="(skill, index) in skillRow" :key="index">
+                  <el-input :placeholder="skill.placeholder" v-model="skill.label" :disabled="skill.disabled" />
+                </el-col>
+              </el-row>
             </el-col>
-          </el-col>
-        </el-row>
-      </el-form>
+          </el-form-item>
 
-      <el-divider></el-divider>
+          <el-form-item label="我目前有的核心" />
 
-      <success-text v-if="passList.length !== 0" :pass-list="passList" :skill-map="skillMap" />
-      <failed-text v-else-if="isFailed" />
-      <chance-text v-else-if="chancePayload.length !== 0" :chance-payload="chancePayload" :skill-map="skillMap" />
-    </el-col>
-  </el-row>
+          <core-selector v-model="coreList" :skill-options="skills" />
+
+          <el-row>
+            <el-col>
+              <el-col>
+                <el-button style="width: 100%" type="success" @click="start">開始計算</el-button>
+              </el-col>
+            </el-col>
+          </el-row>
+        </el-form>
+
+        <el-divider></el-divider>
+
+        <div v-loading="isLoading">
+          <success-text v-if="passList.length !== 0" :pass-list="passList" :skill-map="skillMap" />
+          <failed-text v-else-if="isFailed" />
+          <chance-text v-else-if="chancePayload.length !== 0" :chance-payload="chancePayload" :skill-map="skillMap" />
+        </div>
+      </el-col>
+
+      <description />
+    </el-row>
+  </div>
 </template>
 
 <script>
@@ -56,6 +62,7 @@ import CoreSelector from './components/CoreSelector.vue'
 import SuccessText from './components/SuccessText.vue'
 import FailedText from './components/FailedText.vue'
 import ChanceText from './components/ChanceText.vue'
+import Description from './components/Description.vue'
 import { jobsMap, FREE_JOB_TEXT, SUCCESS_STATUS, FAILED_STATUS, CHANCE_STATUS } from './dictionary'
 import { vMatrixTool } from './utils'
 
@@ -68,6 +75,7 @@ export default {
     SuccessText,
     FailedText,
     ChanceText,
+    Description,
   },
 
   data() {
@@ -102,6 +110,8 @@ export default {
       )
 
     return {
+      isLoading: false, // for simulate
+
       myJob: FREE_JOB_TEXT,
       targetCoreNumber: null,
       skills,
@@ -134,15 +144,26 @@ export default {
         return
       }
 
-      this.targetCoreNumber = Math.round((jobInfo.skills.length * 2) / 3)
+      this.targetCoreNumber = (() => {
+        // 凱殷 有夠特別
+        if (this.myJob === '凱殷') return 6
 
+        switch (jobInfo.skills.length) {
+          case 6:
+            return 4
+          case 9:
+            return 6
+          default:
+            return 4
+        }
+      })()
+
+      flatSkills.forEach((skill) => {
+        skill.label = ''
+      })
       jobInfo.skills.forEach((skill, index) => {
         flatSkills[index].label = skill
       })
-    },
-
-    'coreList.length'() {
-      this.resetStatus()
     },
 
     targetCoreNumber(targetCoreNumber) {
@@ -167,10 +188,53 @@ export default {
       this.chancePayload = []
     },
 
-    start() {
+    check() {
+      const formatSkillList = this.skills.flat().filter((skill) => !skill.disabled)
+
+      // 空白欄位
+      const emptySkill = formatSkillList.some((skill) => skill.label === '')
+      if (emptySkill) {
+        this.$notify.error('請填滿所有「想要的技能」欄位')
+        return false
+      }
+
+      // 重複技能欄位
+      const skillUnique = formatSkillList.length === [...new Set(formatSkillList.map((skill) => skill.label))].length
+      if (!skillUnique) {
+        this.$notify.error('在「想要的技能」欄位有出現一樣的技能名稱，請檢查一下')
+        return false
+      }
+
+      // TODO 在選擇器上畫顏色? custom selector options 之類的
+
+      // 相同核心有重複的技能
+      const coreSkillsUnique = this.coreList.every((core) => {
+        // 有空的就不看了
+        if (core.skills.some((skill) => skill === null)) return true
+
+        // 直接用 unique 判斷
+        return core.skills.length === [...new Set(core.skills)].length
+      })
+      if (!coreSkillsUnique) {
+        this.$notify.error('在「我目前有的核心」欄位有核心出現一樣的技能，請檢查一下')
+        return false
+      }
+
+      return true
+    },
+
+    async start() {
+      if (!this.check()) return
+
+      this.isLoading = true
+      await new Promise((r) => setTimeout(r, 200))
+      this.isLoading = false
+
       this.resetStatus()
 
-      const result = vMatrixTool(this.coreList, this.targetCoreNumber)
+      const formatCoreList = this.coreList.filter((core) => core.skills.every((skill) => skill !== null))
+
+      const result = vMatrixTool(formatCoreList, this.targetCoreNumber)
       switch (result.status) {
         case SUCCESS_STATUS:
           this.passList = result.passList
@@ -195,7 +259,14 @@ export default {
   padding: 0px;
 }
 
+.outer {
+  width: 100%;
+  justify-content: center;
+  display: flex;
+}
+
 .container {
   padding: 15px;
+  max-width: 900px;
 }
 </style>

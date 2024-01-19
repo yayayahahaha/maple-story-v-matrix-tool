@@ -54,15 +54,6 @@
       <el-button type="primary" style="width: 100%" @click="add()">添加核心</el-button>
     </el-col>
   </el-row>
-
-  <el-descriptions>
-    <el-descriptions-item>
-      <h5>
-        註:
-        「指定」的意思是排列組合裡一定要有這顆核心。主要用於已經先把可用的核心提升過等級、但仍未湊齊其他核心的場景，這時就會將這顆已經提升過等級的核心指定為指定核心，避免如果排列組合沒有選到此顆核心時那些經驗值就浪費了。
-      </h5>
-    </el-descriptions-item>
-  </el-descriptions>
 </template>
 
 <script>
@@ -125,3 +116,6 @@ export default {
   },
 }
 </script>
+
+<!-- TODO 刪除後的復原功能 -->
+<!-- TODO 存在 localStorage 裡的資料，避免重複輸入 -->
