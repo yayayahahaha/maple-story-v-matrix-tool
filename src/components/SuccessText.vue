@@ -1,22 +1,23 @@
 <template>
-  <!-- success -->
   <el-text type="danger">
     <h1>🎉🎉🎉 你成功啦 🎉🎉🎉</h1>
   </el-text>
 
-  <p>核心組成</p>
-  <p v-for="(skillList, index) in renderList" :key="index" style="margin-bottom: 12px">
-    <span v-text="`第 ${index + 1} 顆`"></span>
-    <span>: </span>
-    <el-tag
-      :type="skill.color.type"
-      :effect="skill.color.effect"
-      style="margin-left: 12px"
-      v-for="(skill, skillIndex) in skillList"
-      :key="skillIndex"
-      >{{ skill.label }}</el-tag
-    >
-  </p>
+  <div v-for="(combination, index) in passList" :key="index" style="margin-bottom: 12px">
+    <div v-for="(core, coreIndex) in combination" :key="coreIndex" style="margin-bottom: 12px">
+      <span>{{ `第 ${coreIndex + 1} 顆` }}</span>
+      <el-tag
+        v-for="(skill, skillIndex) in core.skills"
+        :type="skillMap[skill].color.type"
+        :effect="skillMap[skill].color.effect"
+        style="margin-left: 12px"
+        :key="skillIndex"
+      >
+        {{ skillMap[skill].label }}
+      </el-tag>
+    </div>
+    <el-divider v-if="index + 1 !== passList.length" />
+  </div>
 </template>
 
 <script>
@@ -37,18 +38,14 @@ export default {
 
   computed: {
     renderList() {
-      return this.passList.flat().map((core) => {
-        const returnCore = []
-        core.skills.forEach((skill) => returnCore.push(this.skillMap[skill]))
-        return returnCore
+      return this.passList.map((group) => {
+        return group.map((core) => {
+          const returnCore = []
+          core.skills.forEach((skill) => returnCore.push(this.skillMap[skill]))
+          return returnCore
+        })
       })
     },
   },
-
-  created() {
-    console.log(this.passList.flat())
-  },
-
-  methods: {},
 }
 </script>

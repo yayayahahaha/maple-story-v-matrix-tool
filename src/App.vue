@@ -3,7 +3,7 @@
     <el-row :gutter="15" class="container">
       <el-col style="margin-bottom: 12px">
         <h1>楓之谷 V 矩陣 核心工具</h1>
-        <h6>適用版本: Ver.2.58.3</h6>
+        <h6>適用版本: Ver.2.58.3 (2024/1)</h6>
       </el-col>
 
       <el-col>
