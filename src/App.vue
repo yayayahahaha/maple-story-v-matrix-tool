@@ -155,6 +155,9 @@ export default {
         }
       })()
 
+      flatSkills.forEach((skill) => {
+        skill.label = ''
+      })
       jobInfo.skills.forEach((skill, index) => {
         flatSkills[index].label = skill
       })
