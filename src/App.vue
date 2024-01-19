@@ -43,7 +43,7 @@
 
       <el-divider></el-divider>
 
-      <success-text v-if="passList.length !== 0" :pass-list="passList" :skill-label-map="skillLabelMap" />
+      <success-text v-if="passList.length !== 0" :pass-list="passList" :skill-map="skillMap" />
     </el-col>
   </el-row>
 </template>
@@ -65,12 +65,27 @@ export default {
   },
 
   data() {
+    const colorSet = [
+      { effect: 'dark', type: '' },
+      { effect: 'dark', type: 'info' },
+      { effect: 'dark', type: 'success' },
+      { effect: 'dark', type: 'danger' },
+      { effect: 'dark', type: 'warning' },
+      { effect: 'light', type: '' },
+      { effect: 'light', type: 'info' },
+      { effect: 'light', type: 'success' },
+      { effect: 'light', type: 'danger' },
+      { effect: 'light', type: 'warning' },
+    ]
+
     const skills = [...new Array(9)]
       .map((_, index) => ({
         value: `skill-${index + 1}`,
         placeholder: `技能 ${index + 1}`,
+        // TODO testing codes
         label: `${index}`,
         // label: '',
+        color: colorSet[index],
         disabled: false,
       }))
       .reduce(
@@ -93,8 +108,8 @@ export default {
   },
 
   computed: {
-    skillLabelMap() {
-      return Object.fromEntries(this.skills.flat().map((skill) => [skill.value, skill.label]))
+    skillMap() {
+      return Object.fromEntries(this.skills.flat().map((skill) => [skill.value, skill]))
     },
   },
 

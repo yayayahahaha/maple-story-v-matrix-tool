@@ -5,10 +5,17 @@
   </el-text>
 
   <p>核心組成</p>
-  <p v-for="(skillList, index) in renderList" :key="index">
-    <span v-text="`第${index + 1}顆`"></span>
+  <p v-for="(skillList, index) in renderList" :key="index" style="margin-bottom: 12px">
+    <span v-text="`第 ${index + 1} 顆`"></span>
     <span>: </span>
-    <span v-text="`[${skillList.join('] [')}]`"></span>
+    <el-tag
+      :type="skill.color.type"
+      :effect="skill.color.effect"
+      style="margin-left: 12px"
+      v-for="(skill, skillIndex) in skillList"
+      :key="skillIndex"
+      >{{ skill.label }}</el-tag
+    >
   </p>
 </template>
 
@@ -22,7 +29,7 @@ export default {
       required: true,
     },
 
-    skillLabelMap: {
+    skillMap: {
       type: Object,
       required: true,
     },
@@ -32,7 +39,7 @@ export default {
     renderList() {
       return this.passList.flat().map((core) => {
         const returnCore = []
-        core.skills.forEach((skill) => returnCore.push(this.skillLabelMap[skill]))
+        core.skills.forEach((skill) => returnCore.push(this.skillMap[skill]))
         return returnCore
       })
     },
