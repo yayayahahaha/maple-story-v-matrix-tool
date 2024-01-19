@@ -44,6 +44,7 @@
       <el-divider></el-divider>
 
       <success-text v-if="passList.length !== 0" :pass-list="passList" :skill-map="skillMap" />
+      <failed-text v-else-if="isFailed" />
     </el-col>
   </el-row>
 </template>
@@ -52,6 +53,7 @@
 import JobSelector from './components/JobSelector.vue'
 import CoreSelector from './components/CoreSelector.vue'
 import SuccessText from './components/SuccessText.vue'
+import FailedText from './components/FailedText.vue'
 import { FREE_JOB_TEXT, SUCCESS_STATUS, FAILED_STATUS, CHANCE_STATUS } from './dictionary'
 import { vMatrixTool } from './utils'
 
@@ -62,6 +64,7 @@ export default {
     JobSelector,
     CoreSelector,
     SuccessText,
+    FailedText,
   },
 
   data() {
@@ -104,6 +107,8 @@ export default {
       coreList: [],
 
       passList: [],
+      isFailed: false,
+      isChance: false,
     }
   },
 
@@ -114,6 +119,10 @@ export default {
   },
 
   watch: {
+    'coreList.length'() {
+      this.resetStatus()
+    },
+
     targetCoreNumber(targetCoreNumber) {
       const flatSkills = this.skills.flat()
 
@@ -130,22 +139,27 @@ export default {
   },
 
   methods: {
-    success({ passList }) {
-      this.passList = passList
-    },
-    start() {
+    resetStatus() {
       this.passList = []
+      this.isFailed = false
+      this.isChance = false
+    },
+
+    start() {
+      this.resetStatus()
 
       const result = vMatrixTool(this.coreList, this.targetCoreNumber)
       switch (result.status) {
         case SUCCESS_STATUS:
-          this.success(result)
+          this.passList = result.passList
           break
+
         case FAILED_STATUS:
-          this.failed()
+          this.isFailed = true
           break
+
         case CHANCE_STATUS:
-          this.chance()
+          this.isChance = true
           break
       }
     },
