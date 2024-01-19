@@ -45,6 +45,7 @@
 
       <success-text v-if="passList.length !== 0" :pass-list="passList" :skill-map="skillMap" />
       <failed-text v-else-if="isFailed" />
+      <chance-text v-else-if="chancePayload.length !== 0" :chance-payload="chancePayload" :skill-map="skillMap" />
     </el-col>
   </el-row>
 </template>
@@ -54,6 +55,7 @@ import JobSelector from './components/JobSelector.vue'
 import CoreSelector from './components/CoreSelector.vue'
 import SuccessText from './components/SuccessText.vue'
 import FailedText from './components/FailedText.vue'
+import ChanceText from './components/ChanceText.vue'
 import { FREE_JOB_TEXT, SUCCESS_STATUS, FAILED_STATUS, CHANCE_STATUS } from './dictionary'
 import { vMatrixTool } from './utils'
 
@@ -65,6 +67,7 @@ export default {
     CoreSelector,
     SuccessText,
     FailedText,
+    ChanceText,
   },
 
   data() {
@@ -108,7 +111,7 @@ export default {
 
       passList: [],
       isFailed: false,
-      isChance: false,
+      chancePayload: [],
     }
   },
 
@@ -142,7 +145,7 @@ export default {
     resetStatus() {
       this.passList = []
       this.isFailed = false
-      this.isChance = false
+      this.chancePayload = []
     },
 
     start() {
@@ -159,7 +162,7 @@ export default {
           break
 
         case CHANCE_STATUS:
-          this.isChance = true
+          this.chancePayload = result.payload
           break
       }
     },
