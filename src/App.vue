@@ -1,26 +1,27 @@
 <template>
-  <el-row gutter="15px" class="container">
+  <el-row :gutter="15" class="container">
     <el-col style="margin-bottom: 12px">
       <h1>楓之谷 V 矩陣 核心工具</h1>
+      <h6>適用版本: Ver.2.58.3</h6>
     </el-col>
 
     <el-col>
       <el-form>
         <el-form-item label="我的職業是">
-          <el-select></el-select>
+          <JobSelector v-model="myJob" />
         </el-form-item>
 
         <el-form-item label="我想要湊">
-          <el-radio-group>
-            <el-radio>四核六技</el-radio>
-            <el-radio>六核九技</el-radio>
+          <el-radio-group v-model="targetCoreNumber">
+            <el-radio :label="4">四核六技</el-radio>
+            <el-radio :label="6">六核九技</el-radio>
           </el-radio-group>
         </el-form-item>
 
         <el-form-item label="我想要的技能是">
           <el-col>
-            <el-row v-for="item in 3" :gutter="15" style="margin-bottom: 20px">
-              <el-col :span="6" v-for="item in 3">
+            <el-row v-for="item in skills.length / 3" :key="item.key" :gutter="15" style="margin-bottom: 20px">
+              <el-col :span="6" v-for="(skillName, index) in 3" :key="index">
                 <el-input></el-input>
               </el-col>
             </el-row>
@@ -57,15 +58,28 @@
 </template>
 
 <script>
+import JobSelector from './components/JobSelector.vue'
+import { FREE_JOB_TEXT } from './dictionary'
+
 export default {
   name: 'App',
 
-  components: {},
+  components: {
+    JobSelector,
+  },
 
   props: {},
 
   data() {
-    return {}
+    return {
+      myJob: FREE_JOB_TEXT,
+      targetCoreNumber: 4,
+      skills: [...new Array(9)].map((_, index) => ({
+        value: `skill-${index + 1}`,
+        placeholder: `技能-${index + 1}`,
+        label: '',
+      })),
+    }
   },
 
   computed: {},
