@@ -228,6 +228,8 @@ export function VMatrixCore(config) {
   // skills
   // required
   const id = v4()
-  Object.assign(this, config, { id })
+  Object.assign(this, { required: false, skills: [] }, config, { id })
+  this.skills = this.skills.slice()
+
   return this
 }
