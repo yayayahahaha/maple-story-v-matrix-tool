@@ -44,9 +44,11 @@
 
         <el-divider></el-divider>
 
-        <success-text v-if="passList.length !== 0" :pass-list="passList" :skill-map="skillMap" />
-        <failed-text v-else-if="isFailed" />
-        <chance-text v-else-if="chancePayload.length !== 0" :chance-payload="chancePayload" :skill-map="skillMap" />
+        <div v-loading="isLoading">
+          <success-text v-if="passList.length !== 0" :pass-list="passList" :skill-map="skillMap" />
+          <failed-text v-else-if="isFailed" />
+          <chance-text v-else-if="chancePayload.length !== 0" :chance-payload="chancePayload" :skill-map="skillMap" />
+        </div>
       </el-col>
 
       <description />
@@ -108,6 +110,8 @@ export default {
       )
 
     return {
+      isLoading: false, // for simulate
+
       myJob: FREE_JOB_TEXT,
       targetCoreNumber: null,
       skills,
@@ -145,10 +149,6 @@ export default {
       jobInfo.skills.forEach((skill, index) => {
         flatSkills[index].label = skill
       })
-    },
-
-    'coreList.length'() {
-      this.resetStatus()
     },
 
     targetCoreNumber(targetCoreNumber) {
@@ -197,8 +197,12 @@ export default {
       return true
     },
 
-    start() {
+    async start() {
       if (!this.check()) return
+
+      this.isLoading = true
+      await new Promise((r) => setTimeout(r, 200))
+      this.isLoading = false
 
       this.resetStatus()
 
