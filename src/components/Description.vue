@@ -1,4 +1,5 @@
 <template>
+  <el-divider></el-divider>
   <el-descriptions>
     <el-descriptions-item>
       <h5>

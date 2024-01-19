@@ -46,7 +46,9 @@ export function vMatrixTool(originList, purpose) {
 
     // required
     if (!hasRequiredCore) return true
-    return combination.some((core) => requriedCoreMap[core.id])
+    return Object.keys(requriedCoreMap).every((requiredCoreId) => {
+      return combination.find((core) => core.id === requiredCoreId)
+    })
   })
 
   // 過濾出需求數目的組合 (四核六技 or 六核九技)
