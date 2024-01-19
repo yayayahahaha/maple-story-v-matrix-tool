@@ -14,7 +14,8 @@
         >的文章
       </h5>
       <h5>
-        註3: 亞克全部的技能都要用到，參考了巴哈<a href="https://forum.gamer.com.tw/C.php?bsn=7650&snA=993338">阿翔 </a
+        註3: 亞克和神之子全部的技能都要用到，參考了巴哈<a href="https://forum.gamer.com.tw/C.php?bsn=7650&snA=993338"
+          >阿翔 </a
         >的文章與討論
       </h5>
       <h5>
