@@ -14,8 +14,8 @@
 
           <el-form-item label="我想要湊">
             <el-radio-group v-model="targetCoreNumber">
-              <el-radio :label="4">四核六技</el-radio>
-              <el-radio :label="6">六核九技</el-radio>
+              <el-radio :label="4">4 核 6 技</el-radio>
+              <el-radio :label="6">6 核 9 技</el-radio>
             </el-radio-group>
           </el-form-item>
 
@@ -169,10 +169,38 @@ export default {
       this.chancePayload = []
     },
 
+    check() {
+      const formatSkillList = this.skills.flat().filter((skill) => !skill.disabled)
+
+      // 空白欄位
+      const emptySkill = formatSkillList.some((skill) => skill.label === '')
+      if (emptySkill) {
+        this.$notify.error('請填滿所有「想要的技能」欄位')
+        return false
+      }
+
+      // 重複技能欄位
+      const skillUnique = formatSkillList.length === [...new Set(formatSkillList.map((skill) => skill.label))].length
+      if (!skillUnique) {
+        this.$notify.error('在「想要的技能」欄位有出現一樣的技能名稱，請檢查一下')
+        return false
+      }
+
+      // TODO 在選擇器上畫顏色? custom selector options 之類的
+      // 相同核心有重複的技能
+      console.log(this.coreList)
+
+      return true
+    },
+
     start() {
+      if (!this.check()) return
+
       this.resetStatus()
 
-      const result = vMatrixTool(this.coreList, this.targetCoreNumber)
+      const formatCoreList = this.coreList.filter((core) => core.skills.every((skill) => skill !== null))
+
+      const result = vMatrixTool(formatCoreList, this.targetCoreNumber)
       switch (result.status) {
         case SUCCESS_STATUS:
           this.passList = result.passList

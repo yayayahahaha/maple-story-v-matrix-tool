@@ -58,9 +58,16 @@
   <el-descriptions>
     <el-descriptions-item>
       <h5>
-        註:
+        註1: 職業的核心參考巴哈<a href="https://home.gamer.com.tw/homeindex.php?owner=as12bird">天然鳶</a>的<a
+          href="https://forum.gamer.com.tw/C.php?bsn=7650&snA=994679"
+          >貼文</a
+        >， 在選擇職業後如果想客製化，也可以根據自身喜好手動調整想要的技能組。
+      </h5>
+      <h5>
+        註2:
         「指定」的意思是排列組合裡一定要有這顆核心。主要用於已經先把可用的核心提升過等級、但仍未湊齊其他核心的場景，這時就會將這顆已經提升過等級的核心指定為指定核心，避免如果排列組合沒有選到此顆核心時那些經驗值就浪費了。
       </h5>
+      <h5>註3: 如果有核心未填滿 3 個技能，此核心將不會被納入排列組合裡。</h5>
     </el-descriptions-item>
   </el-descriptions>
 </template>
