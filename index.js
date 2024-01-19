@@ -1,60 +1,52 @@
 // TODO 產一大堆假資料跑跑看
-// TODO 把 chance 的核心做整理? 列出所有可能之類的
-// TODO 一定要有哪顆核心: 用於已經練上去了的情況
 // TODO 沒試過六核九技，不知道會不會出事
 // TODO 依照職業做下拉選單、推薦對應的技能? 附上來源之類的
 
 // 四核六技計算機
 
-const purpose = 4
+import { v4 } from 'uuid'
 
-const list = [
-  ['1', '2', '3'],
-  ['2', '3', '4'],
-  ['3', '4', '5'],
-  ['4', '5', '6'],
-  // chance
-  // ['6', '1', '2'],
-  // ['1', '5', '6'],
-  // ['6', '5', '1'],
-  ['3', '2', '1'],
-]
-
-/**
- * @function _countSkillsOfEach
- * @TODO document
- * */
-function _countSkillsOfEach(list) {
-  return list.reduce((acc, skills) => {
-    skills.forEach((skill) => {
-      acc[skill] = acc[skill] || 0
-      acc[skill]++
-    })
-    return acc
-  }, {})
+function test() {
+  const purpose = 4
+  const list = [
+    ['共鳴', '魔咒', '藝術'],
+    ['共鳴', '衝刺', '綻放'],
+    ['共鳴', '藝術', '衝刺'],
+    ['共鳴', '綻放', '衝刺'],
+    ['共鳴', '魔咒', '藝術'],
+    ['魔咒', '衝刺', '藝術'],
+    ['魔咒', '衝刺', '共鳴'],
+    ['突襲', '綻放', '共鳴'],
+    // ['藝術', '突襲', '綻放'],
+    // ['共鳴', '衝刺', '藝術'],
+    // ['綻放', '魔咒', '衝刺'],
+    // ['藝術', '魔咒', '突襲'],
+  ]
+  vMatrixTool(list, purpose)
 }
+false && test()
 
-/**
- * @function _checkHasStartWithSame
- * @TODO document
- * */
-function _checkHasStartWithSame(list) {
-  // TODO 檢查 input 格式
+export function vMatrixTool(originList, purpose) {
+  const list = originList.map((item) => {
+    if (item instanceof VMatrixCore) return item
+    return new VMatrixCore({ skills: item, required: false })
+  })
 
-  return !list.reduce((map, items) => {
-    if (map === true) return false
-    if (map[items[0]] != null) return false
-    map[items[0]] = true
+  // required 的核心 map
+  const requriedCoreMap = Object.fromEntries(list.filter((core) => core.required).map((item) => [item.id, item]))
+  const hasRequiredCore = Object.keys(requriedCoreMap).length !== 0
 
-    return map
-  }, {})
-}
-
-function start() {
   const passList = []
 
-  // 過濾出開頭一樣的組合
-  const unFilteredCombinations = uniqueCombinationOfArray(list).filter((skills) => !_checkHasStartWithSame(skills))
+  // 排除開頭一樣的組合 和沒有包含 requried 核心的組合
+  const unFilteredCombinations = _uniqueCombinationOfArray(list).filter((combination) => {
+    // 開頭
+    if (_checkHasStartWithSame(combination)) return false
+
+    // required
+    if (!hasRequiredCore) return true
+    return combination.some((core) => requriedCoreMap[core.id])
+  })
 
   // 過濾出需求數目的組合 (四核六技 or 六核九技)
   const allCombinations = unFilteredCombinations.filter((skills) => skills.length === purpose)
@@ -75,8 +67,8 @@ function start() {
   // 計算一下還差哪顆
   const missOneList = unFilteredCombinations.filter((skills) => skills.length === purpose - 1)
 
-  const chanceList = missOneList.reduce((chanceList, conbinationList) => {
-    const conbinationCount = _countSkillsOfEach(conbinationList)
+  const chanceList = missOneList.reduce((chanceList, coreList) => {
+    const conbinationCount = _countSkillsOfEach(coreList)
 
     // 整理: { [相同技能數量的技能數]: { count: 幾個技能的技能數量是這個n, skillList: [是哪些技能] } }
     const skillCount = Object.keys(conbinationCount).reduce((map, skill) => {
@@ -95,23 +87,14 @@ function start() {
     // 其中 { 共鳴: 3, 魔咒: 2, 藝術: 2, 衝刺: 2 }
     // 如果剛好只數到 1 個的技能有 3 個、且其他的技能都有 2 個的話，就代表只剩這顆。
     if (skillCount[2]?.count === 3 && skillCount[1]?.count === 3) {
-      console.log('好機會!')
-      console.log(conbinationList)
-
-      const firstSkill = conbinationList
-        .map((conbination) => conbination[0])
+      const firstSkill = coreList
+        .map((core) => core.skills[0])
         .find((startSkill) => skillCount[1].skillList.find((count1Skill) => startSkill === count1Skill))
 
-      if (firstSkill == null) {
-        console.log(`開頭可以是任一技能的 [${skillCount[1].skillList.join(', ')}]`)
-      } else {
-        console.log(`開頭不能是 ${firstSkill} 的 [${skillCount[1].skillList.join(', ')}]`)
-      }
-      console.log('')
-
       chanceList.push({
-        firstCannot: firstSkill,
+        firstCannot: firstSkill || null,
         neededOne: skillCount[1].skillList,
+        coreList,
       })
     }
 
@@ -119,74 +102,132 @@ function start() {
   }, [])
 
   if (chanceList.length === 0) console.log('很可惜都沒有，也沒有只差一顆的')
-}
+  else {
+    const payload = chanceList.reduce((map, payload) => {
+      const { firstCannot, neededOne } = payload
 
-start()
+      const pkList = neededOne.sort((a, b) => a.localeCompare(b))
+      const pk = pkList.join(', ')
+      map[pk] = map[pk] || {
+        allAllow: false,
+        coreList: [],
+        firstCannotList: [],
+      }
 
-// https://blog.pulipuli.info/2011/01/print-all-unique-combination-of-array.html
-// TODO 改寫成自己的版本，可以直接重寫沒關係
-function uniqueCombinationOfArray(_array) {
-  var _combination = []
+      map[pk].coreList.push(payload)
+      map[pk].allAllow = map[pk].allAllow || firstCannot == null
+      if (!map[pk].allAllow) map[pk].firstCannotList.push(firstCannot)
+      map[pk].firstCannotList = [...new Set(map[pk].firstCannotList)]
 
-  var _length = _array.length
-
-  for (var _l = 1; _l < _length; _l++) {
-    _combination = _parse_combination(_array, _combination, _l)
+      return map
+    }, {})
+    console.log(payload)
   }
-  _combination.push(_array)
 
-  return _combination
+  /**
+   * @function _countSkillsOfEach
+   * @TODO document
+   * */
+  function _countSkillsOfEach(list) {
+    return list.reduce((acc, core) => {
+      core.skills.forEach((skill) => {
+        acc[skill] = acc[skill] || 0
+        acc[skill]++
+      })
+      return acc
+    }, {})
+  }
 
-  function _parse_combination(_array, _output, _length, _length_pos, _length_ang) {
-    if (_length_pos == null) _length_pos = 1
-    if (_length_ang == null) _length_ang = []
+  /**
+   * @function _checkHasStartWithSame
+   * @TODO document
+   * */
+  function _checkHasStartWithSame(list) {
+    // TODO 檢查 input 格式
 
-    //初始化的部份
-    if (_length_ang.length < _length_pos) {
-      if (_length_pos == 1) {
-        _length_ang.push(1)
-      } else {
-        var _prev_index = _length_ang[_length_ang.length - 1]
-        _length_ang.push(_prev_index + 1)
-      }
+    const firstSkillList = list.map((core) => core.skills[0])
+    return firstSkillList.length !== [...new Set(firstSkillList)].length
+  }
+
+  /**
+   * @function _uniqueCombinationOfArray
+   * @reference https://blog.pulipuli.info/2011/01/print-all-unique-combination-of-array.html
+   * @TODO 改寫成自己的版本，記得寫測試
+   * */
+  function _uniqueCombinationOfArray(_array) {
+    var _combination = []
+
+    var _length = _array.length
+
+    for (var _l = 1; _l < _length; _l++) {
+      _combination = __parse_combination(_array, _combination, _l)
     }
+    _combination.push(_array)
 
-    var _index = 0
-    if (_length_pos > 1) {
-      var _prev_index = _length_ang[_length_pos - 2]
-      _index = _prev_index + 1
-    }
+    return _combination
 
-    if (_length_ang.length < _length_pos) {
-      _length_ang.push(_index)
-    }
+    function __parse_combination(_array, _output, _length, _length_pos, _length_ang) {
+      if (_length_pos == null) _length_pos = 1
+      if (_length_ang == null) _length_ang = []
 
-    for (var _i = _index; _i < _array.length - (_length - _length_pos); _i++) {
-      if (_length_ang.length > _length_pos) {
-        //避免受到傳址影響，必須重整
-        var _temp = []
-        for (var _p = 0; _p < _length_pos; _p++) _temp.push(_length_ang[_p])
-        _length_ang = _temp
-      }
-
-      _length_ang[_length_pos - 1] = _i
-
-      //如果抵達這個長度的話
-      if (_length_ang.length == _length) {
-        //輸出
-        var _output_ang = []
-        for (var _a in _length_ang) {
-          _index = _length_ang[_a]
-          var _code = _array[_index]
-          _output_ang.push(_code)
+      //初始化的部份
+      if (_length_ang.length < _length_pos) {
+        if (_length_pos == 1) {
+          _length_ang.push(1)
+        } else {
+          var _prev_index = _length_ang[_length_ang.length - 1]
+          _length_ang.push(_prev_index + 1)
         }
-        _output.push(_output_ang)
-      } //如果尚未抵達這個長度
-      else {
-        _output = _parse_combination(_array, _output, _length, _length_pos + 1, _length_ang)
       }
-    }
 
-    return _output
+      var _index = 0
+      if (_length_pos > 1) {
+        var _prev_index = _length_ang[_length_pos - 2]
+        _index = _prev_index + 1
+      }
+
+      if (_length_ang.length < _length_pos) {
+        _length_ang.push(_index)
+      }
+
+      for (var _i = _index; _i < _array.length - (_length - _length_pos); _i++) {
+        if (_length_ang.length > _length_pos) {
+          //避免受到傳址影響，必須重整
+          var _temp = []
+          for (var _p = 0; _p < _length_pos; _p++) _temp.push(_length_ang[_p])
+          _length_ang = _temp
+        }
+
+        _length_ang[_length_pos - 1] = _i
+
+        //如果抵達這個長度的話
+        if (_length_ang.length == _length) {
+          //輸出
+          var _output_ang = []
+          for (var _a in _length_ang) {
+            _index = _length_ang[_a]
+            var _code = _array[_index]
+            _output_ang.push(_code)
+          }
+          _output.push(_output_ang)
+        } //如果尚未抵達這個長度
+        else {
+          _output = __parse_combination(_array, _output, _length, _length_pos + 1, _length_ang)
+        }
+      }
+
+      return _output
+    }
   }
+}
+/**
+ * @function VMatrixCore
+ * @TODO syntax check, document, make id cannot be overwrite with property and getter function
+ * */
+export function VMatrixCore(config) {
+  // skills
+  // required
+  const id = v4()
+  Object.assign(this, config, { id })
+  return this
 }

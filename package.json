@@ -2,6 +2,7 @@
   "name": "maple-story-v-matrix-tool",
   "version": "1.0.0",
   "description": "",
+  "type": "module",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -13,5 +14,8 @@
     "eslint": "^8.56.0",
     "eslint-plugin-vue": "^9.20.1",
     "prettier": "^3.2.4"
+  },
+  "dependencies": {
+    "uuid": "^9.0.1"
   }
 }
