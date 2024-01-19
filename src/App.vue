@@ -1,30 +1,90 @@
-<script setup>
-import HelloWorld from './components/HelloWorld.vue'
-</script>
-
 <template>
-  <div>
-    <a href="https://vitejs.dev" target="_blank">
-      <img src="/vite.svg" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://vuejs.org/" target="_blank">
-      <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
-    </a>
-  </div>
-  <HelloWorld msg="Vite + Vue" />
+  <el-row gutter="15px" class="container">
+    <el-col style="margin-bottom: 12px">
+      <h1>楓之谷 V 矩陣 核心工具</h1>
+    </el-col>
+
+    <el-col>
+      <el-form>
+        <el-form-item label="我的職業是">
+          <el-select></el-select>
+        </el-form-item>
+
+        <el-form-item label="我想要湊">
+          <el-radio-group>
+            <el-radio>四核六技</el-radio>
+            <el-radio>六核九技</el-radio>
+          </el-radio-group>
+        </el-form-item>
+
+        <el-form-item label="我想要的技能是">
+          <el-col>
+            <el-row v-for="item in 3" :gutter="15" style="margin-bottom: 20px">
+              <el-col :span="6" v-for="item in 3">
+                <el-input></el-input>
+              </el-col>
+            </el-row>
+          </el-col>
+        </el-form-item>
+
+        <el-form-item label="我目前有的核心"> </el-form-item>
+
+        <el-row>
+          <el-col>
+            <div style="display: flex">
+              <el-button>hello</el-button>
+              <el-select style="margin-left: 12px"></el-select>
+              <el-select style="margin-left: 12px"></el-select>
+              <el-select style="margin-left: 12px"></el-select>
+              <el-button style="margin-left: 12px">hello</el-button>
+              <el-button>hello</el-button>
+            </div>
+          </el-col>
+        </el-row>
+        <el-row :gutter="15" style="margin-top: 12px">
+          <el-col style="margin-bottom: 12px">
+            <el-button style="width: 100%">添加</el-button>
+          </el-col>
+          <el-col>
+            <el-button style="width: 100%">開始計算</el-button>
+          </el-col>
+        </el-row>
+      </el-form>
+
+      <el-divider></el-divider>
+    </el-col>
+  </el-row>
 </template>
 
-<style scoped>
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
+<script>
+export default {
+  name: 'App',
+
+  components: {},
+
+  props: {},
+
+  data() {
+    return {}
+  },
+
+  computed: {},
+
+  watch: {},
+
+  created() {},
+
+  methods: {},
 }
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
+</script>
+
+<style>
+* {
+  margin: 0px;
+  padding: 0px;
 }
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
+
+.container {
+  padding: 15px;
 }
 </style>

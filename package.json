@@ -13,13 +13,14 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@vitejs/plugin-vue": "^4.5.2",
     "eslint": "^8.56.0",
     "eslint-plugin-vue": "^9.20.1",
     "prettier": "^3.2.4",
-    "@vitejs/plugin-vue": "^4.5.2",
     "vite": "^5.0.8"
   },
   "dependencies": {
+    "element-plus": "^2.5.2",
     "uuid": "^9.0.1",
     "vue": "^3.3.11"
   }
