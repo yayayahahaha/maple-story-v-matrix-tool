@@ -119,13 +119,8 @@ export function vMatrixTool(originList, purpose) {
   function _checkHasStartWithSame(list) {
     // TODO 檢查 input 格式
 
-    return !list.reduce((map, items) => {
-      if (map === true) return false
-      if (map[items.skills[0]] != null) return false
-      map[items[0]] = true
-
-      return map
-    }, {})
+    const firstSkillList = list.map((core) => core.skills[0])
+    return firstSkillList.length !== [...new Set(firstSkillList)].length
   }
 
   /**
