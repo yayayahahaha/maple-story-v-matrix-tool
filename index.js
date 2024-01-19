@@ -1,5 +1,4 @@
 // TODO 產一大堆假資料跑跑看
-// TODO 把 chance 的核心做整理? 列出所有可能之類的
 // TODO 沒試過六核九技，不知道會不會出事
 // TODO 依照職業做下拉選單、推薦對應的技能? 附上來源之類的
 
@@ -18,7 +17,7 @@ const list = [
   ['魔咒', '衝刺', '共鳴'],
   ['突襲', '綻放', '共鳴'],
   // ['藝術', '突襲', '綻放'],
-  // ['綻放', '衝刺', '突襲'],
+  // ['共鳴', '衝刺', '藝術'],
   // ['綻放', '魔咒', '衝刺'],
   // ['藝術', '魔咒', '突襲'],
 ]
@@ -101,7 +100,6 @@ export function vMatrixTool(originList, purpose) {
 
   if (chanceList.length === 0) console.log('很可惜都沒有，也沒有只差一顆的')
   else {
-    console.log(chanceList)
     const payload = chanceList.reduce((map, payload) => {
       const { firstCannot, neededOne } = payload
 
@@ -115,9 +113,8 @@ export function vMatrixTool(originList, purpose) {
 
       map[pk].coreList.push(payload)
       map[pk].allAllow = map[pk].allAllow || firstCannot == null
-      if (!map[pk].allAllow) {
-        map[pk].firstCannotList.push(firstCannot)
-      }
+      if (!map[pk].allAllow) map[pk].firstCannotList.push(firstCannot)
+      map[pk].firstCannotList = [...new Set(map[pk].firstCannotList)]
 
       return map
     }, {})
