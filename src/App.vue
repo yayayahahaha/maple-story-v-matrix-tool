@@ -35,13 +35,15 @@
         <el-row>
           <el-col>
             <el-col>
-              <el-button style="width: 100%">開始計算</el-button>
+              <el-button style="width: 100%" type="success" @click="start">開始計算</el-button>
             </el-col>
           </el-col>
         </el-row>
       </el-form>
 
       <el-divider></el-divider>
+
+      <success-text v-if="passList.length !== 0" :pass-list="passList" :skill-label-map="skillLabelMap" />
     </el-col>
   </el-row>
 </template>
@@ -49,7 +51,9 @@
 <script>
 import JobSelector from './components/JobSelector.vue'
 import CoreSelector from './components/CoreSelector.vue'
-import { FREE_JOB_TEXT } from './dictionary'
+import SuccessText from './components/SuccessText.vue'
+import { FREE_JOB_TEXT, SUCCESS_STATUS, FAILED_STATUS, CHANCE_STATUS } from './dictionary'
+import { vMatrixTool } from './utils'
 
 export default {
   name: 'App',
@@ -57,6 +61,7 @@ export default {
   components: {
     JobSelector,
     CoreSelector,
+    SuccessText,
   },
 
   data() {
@@ -64,7 +69,8 @@ export default {
       .map((_, index) => ({
         value: `skill-${index + 1}`,
         placeholder: `技能 ${index + 1}`,
-        label: '',
+        label: `${index}`,
+        // label: '',
         disabled: false,
       }))
       .reduce(
@@ -81,10 +87,16 @@ export default {
       targetCoreNumber: null,
       skills,
       coreList: [],
+
+      passList: [],
     }
   },
 
-  computed: {},
+  computed: {
+    skillLabelMap() {
+      return Object.fromEntries(this.skills.flat().map((skill) => [skill.value, skill.label]))
+    },
+  },
 
   watch: {
     targetCoreNumber(targetCoreNumber) {
@@ -102,7 +114,27 @@ export default {
     this.targetCoreNumber = 4
   },
 
-  methods: {},
+  methods: {
+    success({ passList }) {
+      this.passList = passList
+    },
+    start() {
+      this.passList = []
+
+      const result = vMatrixTool(this.coreList, this.targetCoreNumber)
+      switch (result.status) {
+        case SUCCESS_STATUS:
+          this.success(result)
+          break
+        case FAILED_STATUS:
+          this.failed()
+          break
+        case CHANCE_STATUS:
+          this.chance()
+          break
+      }
+    },
+  },
 }
 </script>
 

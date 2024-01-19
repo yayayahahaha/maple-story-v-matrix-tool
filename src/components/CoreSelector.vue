@@ -5,7 +5,12 @@
         <el-button @click="requiredCore(core)" :type="core.required ? 'warning' : ''">{{
           core.required ? '已指定' : '指定'
         }}</el-button>
-        <el-select style="margin-left: 12px" v-model="core.skills[0]" placeholder="請選擇技能">
+        <el-select
+          style="margin-left: 12px"
+          v-model="core.skills[0]"
+          placeholder="請選擇技能"
+          :filterable="false /* TODO 輸入後無法刪除? */"
+        >
           <el-option
             v-for="(option, index) in options"
             :key="index"
@@ -13,7 +18,12 @@
             :label="option.label"
           ></el-option>
         </el-select>
-        <el-select style="margin-left: 12px" v-model="core.skills[1]" placeholder="請選擇技能">
+        <el-select
+          style="margin-left: 12px"
+          v-model="core.skills[1]"
+          placeholder="請選擇技能"
+          :filterable="false /* TODO 輸入後無法刪除? */"
+        >
           <el-option
             v-for="(option, index) in options"
             :key="index"
@@ -21,7 +31,12 @@
             :label="option.label"
           ></el-option>
         </el-select>
-        <el-select style="margin-left: 12px" v-model="core.skills[2]" placeholder="請選擇技能">
+        <el-select
+          style="margin-left: 12px"
+          v-model="core.skills[2]"
+          placeholder="請選擇技能"
+          :filterable="false /* TODO 輸入後無法刪除? */"
+        >
           <el-option
             v-for="(option, index) in options"
             :key="index"
@@ -42,7 +57,10 @@
 
   <el-descriptions>
     <el-descriptions-item>
-      <h5>註: 「指定」的意思是排列組合裡一定要有這顆核心，常用於已經提升等級、但仍未湊齊其他核心的場景。</h5>
+      <h5>
+        註:
+        「指定」的意思是排列組合裡一定要有這顆核心。主要用於已經先把可用的核心提升過等級、但仍未湊齊其他核心的場景，這時就會將這顆已經提升過等級的核心指定為指定核心，避免如果排列組合沒有選到此顆核心時那些經驗值就浪費了。
+      </h5>
     </el-descriptions-item>
   </el-descriptions>
 </template>

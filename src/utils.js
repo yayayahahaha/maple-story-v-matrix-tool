@@ -5,6 +5,7 @@
 // 四核六技計算機
 
 import { v4 } from 'uuid'
+import { SUCCESS_STATUS, FAILED_STATUS, CHANCE_STATUS } from './dictionary'
 
 function test() {
   const purpose = 4
@@ -62,7 +63,7 @@ export function vMatrixTool(originList, purpose) {
     if (successCombination) passList.push(combination)
   })
 
-  if (passList.length !== 0) return void console.log('你成功啦', passList)
+  if (passList.length !== 0) return { status: SUCCESS_STATUS, passList }
 
   // 計算一下還差哪顆
   const missOneList = unFilteredCombinations.filter((skills) => skills.length === purpose - 1)
@@ -101,7 +102,7 @@ export function vMatrixTool(originList, purpose) {
     return chanceList
   }, [])
 
-  if (chanceList.length === 0) console.log('很可惜都沒有，也沒有只差一顆的')
+  if (chanceList.length === 0) return { status: FAILED_STATUS }
   else {
     const payload = chanceList.reduce((map, payload) => {
       const { firstCannot, neededOne } = payload
@@ -121,7 +122,7 @@ export function vMatrixTool(originList, purpose) {
 
       return map
     }, {})
-    console.log(payload)
+    return { status: CHANCE_STATUS, payload }
   }
 
   /**
@@ -228,7 +229,7 @@ export function VMatrixCore(config) {
   // skills
   // required
   const id = v4()
-  Object.assign(this, { required: false, skills: [] }, config, { id })
+  Object.assign(this, { required: false, skills: [null, null, null] }, config, { id })
   this.skills = this.skills.slice()
 
   return this

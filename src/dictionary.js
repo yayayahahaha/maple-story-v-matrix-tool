@@ -1,4 +1,7 @@
 export const FREE_JOB_TEXT = 'free'
+export const SUCCESS_STATUS = 'SUCCESS'
+export const FAILED_STATUS = 'FAILED'
+export const CHANCE_STATUS = 'CHANCE'
 
 export const jobs = [
   {
