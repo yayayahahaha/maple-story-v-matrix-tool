@@ -8,7 +8,7 @@
     <el-col>
       <el-form>
         <el-form-item label="我的職業是">
-          <JobSelector v-model="myJob" />
+          <job-selector v-model="myJob" />
         </el-form-item>
 
         <el-form-item label="我想要湊">
@@ -20,34 +20,23 @@
 
         <el-form-item label="我想要的技能是">
           <el-col>
-            <el-row v-for="item in skills.length / 3" :key="item.key" :gutter="15" style="margin-bottom: 20px">
-              <el-col :span="6" v-for="(skillName, index) in 3" :key="index">
-                <el-input></el-input>
+            <el-row v-for="(skillRow, rowIndex) in skills" :key="rowIndex" :gutter="15" style="margin-bottom: 20px">
+              <el-col :span="6" v-for="(skill, index) in skillRow" :key="index">
+                <el-input :placeholder="skill.placeholder" v-model="skill.label" :disabled="skill.disabled" />
               </el-col>
             </el-row>
           </el-col>
         </el-form-item>
 
-        <el-form-item label="我目前有的核心"> </el-form-item>
+        <el-form-item label="我目前有的核心" />
+
+        <core-selector v-model="coreList" :skill-options="skills" />
 
         <el-row>
           <el-col>
-            <div style="display: flex">
-              <el-button>hello</el-button>
-              <el-select style="margin-left: 12px"></el-select>
-              <el-select style="margin-left: 12px"></el-select>
-              <el-select style="margin-left: 12px"></el-select>
-              <el-button style="margin-left: 12px">hello</el-button>
-              <el-button>hello</el-button>
-            </div>
-          </el-col>
-        </el-row>
-        <el-row :gutter="15" style="margin-top: 12px">
-          <el-col style="margin-bottom: 12px">
-            <el-button style="width: 100%">添加</el-button>
-          </el-col>
-          <el-col>
-            <el-button style="width: 100%">開始計算</el-button>
+            <el-col>
+              <el-button style="width: 100%">開始計算</el-button>
+            </el-col>
           </el-col>
         </el-row>
       </el-form>
@@ -59,6 +48,7 @@
 
 <script>
 import JobSelector from './components/JobSelector.vue'
+import CoreSelector from './components/CoreSelector.vue'
 import { FREE_JOB_TEXT } from './dictionary'
 
 export default {
@@ -66,27 +56,51 @@ export default {
 
   components: {
     JobSelector,
+    CoreSelector,
   },
 
-  props: {},
-
   data() {
+    const skills = [...new Array(9)]
+      .map((_, index) => ({
+        value: `skill-${index + 1}`,
+        placeholder: `技能 ${index + 1}`,
+        label: '',
+        disabled: false,
+      }))
+      .reduce(
+        (list, skill, index) => {
+          list[Math.floor(index / 3)].push(skill)
+
+          return list
+        },
+        [[], [], []]
+      )
+
     return {
       myJob: FREE_JOB_TEXT,
-      targetCoreNumber: 4,
-      skills: [...new Array(9)].map((_, index) => ({
-        value: `skill-${index + 1}`,
-        placeholder: `技能-${index + 1}`,
-        label: '',
-      })),
+      targetCoreNumber: null,
+      skills,
+      coreList: [],
     }
   },
 
   computed: {},
 
-  watch: {},
+  watch: {
+    targetCoreNumber(targetCoreNumber) {
+      const flatSkills = this.skills.flat()
 
-  created() {},
+      if (targetCoreNumber === 4) {
+        flatSkills.slice(6).forEach((skill) => Object.assign(skill, { disabled: true }))
+      } else {
+        flatSkills.forEach((skill) => Object.assign(skill, { disabled: false }))
+      }
+    },
+  },
+
+  created() {
+    this.targetCoreNumber = 4
+  },
 
   methods: {},
 }
