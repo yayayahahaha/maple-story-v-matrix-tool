@@ -191,8 +191,19 @@ export default {
       }
 
       // TODO 在選擇器上畫顏色? custom selector options 之類的
+
       // 相同核心有重複的技能
-      console.log(this.coreList)
+      const coreSkillsUnique = this.coreList.every((core) => {
+        // 有空的就不看了
+        if (core.skills.some((skill) => skill === null)) return true
+
+        // 直接用 unique 判斷
+        return core.skills.length === [...new Set(core.skills)].length
+      })
+      if (!coreSkillsUnique) {
+        this.$notify.error('在「我目前有的核心」欄位有核心出現一樣的技能，請檢查一下')
+        return false
+      }
 
       return true
     },
