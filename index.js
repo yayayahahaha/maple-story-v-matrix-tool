@@ -9,7 +9,7 @@ import { v4 } from 'uuid'
 
 const purpose = 4
 const list = [
-  new VMatrixCore({ skills: ['共鳴', '魔咒', '藝術'], required: false }),
+  ['共鳴', '魔咒', '藝術'],
   ['共鳴', '衝刺', '綻放'],
   ['共鳴', '藝術', '衝刺'],
   ['共鳴', '綻放', '衝刺'],
@@ -18,7 +18,7 @@ const list = [
   ['魔咒', '衝刺', '共鳴'],
   ['突襲', '綻放', '共鳴'],
   // ['藝術', '突襲', '綻放'],
-  // ['共鳴', '衝刺', '藝術'],
+  // ['綻放', '衝刺', '突襲'],
   // ['綻放', '魔咒', '衝刺'],
   // ['藝術', '魔咒', '突襲'],
 ]
@@ -33,7 +33,6 @@ export function vMatrixTool(originList, purpose) {
   // required 的核心 map
   const requriedCoreMap = Object.fromEntries(list.filter((core) => core.required).map((item) => [item.id, item]))
   const hasRequiredCore = Object.keys(requriedCoreMap).length !== 0
-  console.log(requriedCoreMap)
 
   const passList = []
 
@@ -66,8 +65,8 @@ export function vMatrixTool(originList, purpose) {
   // 計算一下還差哪顆
   const missOneList = unFilteredCombinations.filter((skills) => skills.length === purpose - 1)
 
-  const chanceList = missOneList.reduce((chanceList, conbinationList) => {
-    const conbinationCount = _countSkillsOfEach(conbinationList)
+  const chanceList = missOneList.reduce((chanceList, coreList) => {
+    const conbinationCount = _countSkillsOfEach(coreList)
 
     // 整理: { [相同技能數量的技能數]: { count: 幾個技能的技能數量是這個n, skillList: [是哪些技能] } }
     const skillCount = Object.keys(conbinationCount).reduce((map, skill) => {
@@ -86,23 +85,14 @@ export function vMatrixTool(originList, purpose) {
     // 其中 { 共鳴: 3, 魔咒: 2, 藝術: 2, 衝刺: 2 }
     // 如果剛好只數到 1 個的技能有 3 個、且其他的技能都有 2 個的話，就代表只剩這顆。
     if (skillCount[2]?.count === 3 && skillCount[1]?.count === 3) {
-      console.log('好機會!')
-      console.log(conbinationList)
-
-      const firstSkill = conbinationList
-        .map((conbination) => conbination[0])
+      const firstSkill = coreList
+        .map((core) => core.skills[0])
         .find((startSkill) => skillCount[1].skillList.find((count1Skill) => startSkill === count1Skill))
 
-      if (firstSkill == null) {
-        console.log(`開頭可以是任一技能的 [${skillCount[1].skillList.join(', ')}]`)
-      } else {
-        console.log(`開頭不能是 ${firstSkill} 的 [${skillCount[1].skillList.join(', ')}]`)
-      }
-      console.log('')
-
       chanceList.push({
-        firstCannot: firstSkill,
+        firstCannot: firstSkill || null,
         neededOne: skillCount[1].skillList,
+        coreList,
       })
     }
 
@@ -110,6 +100,29 @@ export function vMatrixTool(originList, purpose) {
   }, [])
 
   if (chanceList.length === 0) console.log('很可惜都沒有，也沒有只差一顆的')
+  else {
+    console.log(chanceList)
+    const payload = chanceList.reduce((map, payload) => {
+      const { firstCannot, neededOne } = payload
+
+      const pkList = neededOne.sort((a, b) => a.localeCompare(b))
+      const pk = pkList.join(', ')
+      map[pk] = map[pk] || {
+        allAllow: false,
+        coreList: [],
+        firstCannotList: [],
+      }
+
+      map[pk].coreList.push(payload)
+      map[pk].allAllow = map[pk].allAllow || firstCannot == null
+      if (!map[pk].allAllow) {
+        map[pk].firstCannotList.push(firstCannot)
+      }
+
+      return map
+    }, {})
+    console.log(payload)
+  }
 
   /**
    * @function _countSkillsOfEach
