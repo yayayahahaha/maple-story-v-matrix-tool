@@ -144,7 +144,16 @@ export default {
         return
       }
 
-      this.targetCoreNumber = Math.round((jobInfo.skills.length * 2) / 3)
+      this.targetCoreNumber = (function () {
+        switch (jobInfo.skills.length) {
+          case 6:
+            return 4
+          case 9:
+            return 6
+          default:
+            return 4
+        }
+      })()
 
       jobInfo.skills.forEach((skill, index) => {
         flatSkills[index].label = skill
