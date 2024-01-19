@@ -48,6 +48,8 @@
         <failed-text v-else-if="isFailed" />
         <chance-text v-else-if="chancePayload.length !== 0" :chance-payload="chancePayload" :skill-map="skillMap" />
       </el-col>
+
+      <description />
     </el-row>
   </div>
 </template>
@@ -58,6 +60,7 @@ import CoreSelector from './components/CoreSelector.vue'
 import SuccessText from './components/SuccessText.vue'
 import FailedText from './components/FailedText.vue'
 import ChanceText from './components/ChanceText.vue'
+import Description from './components/Description.vue'
 import { jobsMap, FREE_JOB_TEXT, SUCCESS_STATUS, FAILED_STATUS, CHANCE_STATUS } from './dictionary'
 import { vMatrixTool } from './utils'
 
@@ -70,6 +73,7 @@ export default {
     SuccessText,
     FailedText,
     ChanceText,
+    Description,
   },
 
   data() {
