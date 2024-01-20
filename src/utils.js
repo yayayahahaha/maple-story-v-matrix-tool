@@ -1,6 +1,4 @@
 // TODO 產一大堆假資料跑跑看
-// TODO 沒試過六核九技，不知道會不會出事
-// TODO 依照職業做下拉選單、推薦對應的技能? 附上來源之類的
 
 // 四核六技計算機
 
@@ -235,4 +233,26 @@ export function VMatrixCore(config) {
   this.skills = this.skills.slice()
 
   return this
+}
+
+const LOCAL_STORAGE_KEY = 'maple-story-v-matrix-tool'
+export const CURRENT_JOB_KEY = 'CURRENT_JOB'
+export function getLocalStorageData() {
+  try {
+    return JSON.parse(window.localStorage.getItem(LOCAL_STORAGE_KEY))
+  } catch {
+    return null
+  }
+}
+export function saveLocalStorageData(payload) {
+  const { coreList, myJob, skills } = payload
+  const data = getLocalStorageData() || {}
+
+  data[CURRENT_JOB_KEY] = myJob
+  data[myJob] = data[myJob] || {}
+  Object.assign(data[myJob], { coreList, skills })
+  window.localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data, null, 2))
+}
+export function resetLocalStorage() {
+  window.localStorage.removeItem(LOCAL_STORAGE_KEY)
 }
