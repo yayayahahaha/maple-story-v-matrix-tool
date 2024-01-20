@@ -104,8 +104,6 @@ export default {
         return list
       }, [])
 
-    console.log('skills:', skills)
-
     return {
       isLoading: false, // for simulate
 
