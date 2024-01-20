@@ -23,7 +23,12 @@
             <el-col>
               <el-row v-for="(skillRow, rowIndex) in skills" :key="rowIndex" :gutter="15" style="margin-bottom: 20px">
                 <el-col :span="6" v-for="(skill, index) in skillRow" :key="index">
-                  <el-input :placeholder="skill.placeholder" v-model="skill.label" :disabled="skill.disabled" />
+                  <el-input
+                    :placeholder="skill.placeholder"
+                    v-model="skill.label"
+                    @change="skill.label = skill.label.trim()"
+                    :disabled="skill.disabled"
+                  />
                 </el-col>
               </el-row>
             </el-col>
