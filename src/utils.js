@@ -253,3 +253,6 @@ export function saveLocalStorageData(payload) {
   Object.assign(data[myJob], { coreList, skills })
   window.localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data, null, 2))
 }
+export function resetLocalStorage() {
+  window.localStorage.removeItem(LOCAL_STORAGE_KEY)
+}

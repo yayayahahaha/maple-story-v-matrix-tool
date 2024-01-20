@@ -60,7 +60,7 @@ export default {
 
   computed: {
     options() {
-      return this.skillOptions.flat().filter((option) => !option.disabled && option.label !== '')
+      return this.skillOptions.flat().filter((option) => option.label !== '')
     },
 
     computedValue: {
@@ -82,10 +82,12 @@ export default {
   methods: {
     add(core = {}) {
       this.computedValue.push(new VMatrixCore(core))
+      this.$emit('core-update')
     },
 
     remove(index) {
       this.computedValue.splice(index, 1)
+      this.$emit('core-update')
     },
 
     requiredCore(core) {
