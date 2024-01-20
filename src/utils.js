@@ -25,6 +25,13 @@ function test() {
 }
 false && test()
 
+// TODO 大改:
+// NEXT 這裡要大改: 改成傳入 coreList 和 skillList
+// 核心數目用 skillList / 3 處理, 主要方法為不用 count 去算，要去逐一檢查每個 skill 是不是有包含兩個
+// 少一的情況要用是不是是剛好是 count 1 的都是我們要用的 skill, 也要看是不是其他的 skill 都是 2
+// ...基本上這個功能整個都怪怪的，寫的時候多檢查一下好了
+// 要在 skill 下面那邊添加一個 「目前選了 n 個技能，最少要花 m 個核心」的提示字樣
+
 export function vMatrixTool(originList, purpose) {
   const list = originList.map((item) => {
     if (item instanceof VMatrixCore) return item
