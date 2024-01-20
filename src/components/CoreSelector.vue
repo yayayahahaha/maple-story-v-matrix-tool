@@ -96,6 +96,3 @@ export default {
   },
 }
 </script>
-
-<!-- TODO 刪除後的復原功能 -->
-<!-- TODO 存在 localStorage 裡的資料，避免重複輸入 -->
