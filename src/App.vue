@@ -214,6 +214,8 @@ export default {
       const savedData = getLocalStorageData()
       if (savedData == null) return
 
+      this.$notify.success('已成功套用先前的操作記錄')
+
       this.myJob = savedData[CURRENT_JOB_KEY]
       this.skills = savedData[this.myJob].skills
       this.coreList = savedData[this.myJob].coreList
