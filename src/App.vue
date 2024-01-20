@@ -32,8 +32,7 @@
                 </el-col>
               </el-row>
               <el-row>
-                <!-- TODO reset button implement -->
-                <el-button type="primary" plain>重置</el-button>
+                <el-button type="primary" plain @click="resetSkills">重置</el-button>
               </el-row>
             </el-col>
           </el-form-item>
@@ -73,7 +72,7 @@ import FailedText from './components/FailedText.vue'
 import ChanceText from './components/ChanceText.vue'
 import Description from './components/Description.vue'
 import { jobsMap, FREE_JOB_TEXT, SUCCESS_STATUS, FAILED_STATUS, CHANCE_STATUS } from './dictionary'
-import { vMatrixTool, getLocalStorageData, saveLocalStorageData } from './utils'
+import { vMatrixTool, CURRENT_JOB_KEY, getLocalStorageData, saveLocalStorageData } from './utils'
 
 export default {
   name: 'App',
@@ -140,22 +139,24 @@ export default {
 
   watch: {
     myJob() {
-      this.saveData()
-
       const flatSkills = this.skills.flat()
+      const savedData = getLocalStorageData() || {}
+
+      // 清空先
+      this.skills.flat().forEach((skill) => Object.assign(skill, { label: '' }))
 
       // 如果是自由職業
       if (this.myJob === FREE_JOB_TEXT) {
-        flatSkills.forEach((skill) => Object.assign(skill, { label: '' }))
+        if (!savedData[FREE_JOB_TEXT]?.skills) return
+
+        this.skills = savedData[FREE_JOB_TEXT]?.skills
+        this.saveData()
         return
       }
 
       const jobInfo = jobsMap[this.myJob]
-      if (jobInfo == null) {
-        alert('發生了奇怪的錯誤，可以先用手動輸入的嗎 🥲')
-        return
-      }
 
+      // TODO 這段後來會砍掉 start
       this.targetCoreNumber = (() => {
         // 凱殷 有夠特別
         if (this.myJob === '凱殷') return 6
@@ -169,13 +170,17 @@ export default {
             return 4
         }
       })()
+      // TODO 這段後來會砍掉 end
 
-      flatSkills.forEach((skill) => {
-        skill.label = ''
-      })
-      jobInfo.skills.forEach((skill, index) => {
-        flatSkills[index].label = skill
-      })
+      if (savedData[this.myJob] != null) {
+        this.skills = savedData[this.myJob].skills
+      } else {
+        jobInfo.skills.forEach((skill, index) => {
+          flatSkills[index].label = skill
+        })
+      }
+
+      this.saveData()
     },
 
     targetCoreNumber(targetCoreNumber) {
@@ -203,15 +208,30 @@ export default {
 
       this.saveData()
     },
+
+    resetSkills() {
+      this.skills.flat().forEach((skill) => Object.assign(skill, { label: '' }))
+      if (this.myJob !== FREE_JOB_TEXT) {
+        const jobInfo = jobsMap[this.myJob].skills
+        this.skills.flat().forEach((skill, index) => {
+          skill.label = jobInfo[index] || ''
+        })
+      }
+      this.saveData()
+    },
+
     saveData() {
       const { coreList, myJob, skills } = this
       saveLocalStorageData({ coreList, myJob, skills })
     },
+
     loadData() {
       const savedData = getLocalStorageData()
       if (savedData == null) return
 
-      console.log('loadData')
+      this.myJob = savedData[CURRENT_JOB_KEY]
+      this.skills = savedData[this.myJob].skills
+      console.log(this.coreList)
     },
 
     resetStatus() {

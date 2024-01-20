@@ -236,6 +236,7 @@ export function VMatrixCore(config) {
 }
 
 const LOCAL_STORAGE_KEY = 'maple-story-v-matrix-tool'
+export const CURRENT_JOB_KEY = 'CURRENT_JOB'
 export function getLocalStorageData() {
   try {
     return JSON.parse(window.localStorage.getItem(LOCAL_STORAGE_KEY))
@@ -247,6 +248,7 @@ export function saveLocalStorageData(payload) {
   const { coreList, myJob, skills } = payload
   const data = getLocalStorageData() || {}
 
+  data[CURRENT_JOB_KEY] = myJob
   data[myJob] = data[myJob] || {}
   Object.assign(data[myJob], { coreList, skills })
   window.localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data, null, 2))
