@@ -2,14 +2,18 @@
   <el-row>
     <el-col>
       <div v-for="(core, coreIndex) in computedValue" style="display: flex; margin-bottom: 12px" :key="core.id">
-        <el-button @click="requiredCore(core)" :type="core.required ? 'warning' : ''">{{
+        <el-button @change="$emit('core-update')" @click="requiredCore(core)" :type="core.required ? 'warning' : ''">{{
           core.required ? '已指定' : '指定'
         }}</el-button>
+
         <el-select
+          v-for="(_, index) in 3"
+          :key="`core-skill-${index + 1}`"
           style="margin-left: 12px"
-          v-model="core.skills[0]"
+          v-model="core.skills[index]"
           placeholder="請選擇技能"
           :filterable="false /* TODO 輸入後無法刪除? */"
+          @change="$emit('core-update')"
         >
           <el-option
             v-for="(option, index) in options"
@@ -18,32 +22,7 @@
             :label="option.label"
           ></el-option>
         </el-select>
-        <el-select
-          style="margin-left: 12px"
-          v-model="core.skills[1]"
-          placeholder="請選擇技能"
-          :filterable="false /* TODO 輸入後無法刪除? */"
-        >
-          <el-option
-            v-for="(option, index) in options"
-            :key="index"
-            :value="option.value"
-            :label="option.label"
-          ></el-option>
-        </el-select>
-        <el-select
-          style="margin-left: 12px"
-          v-model="core.skills[2]"
-          placeholder="請選擇技能"
-          :filterable="false /* TODO 輸入後無法刪除? */"
-        >
-          <el-option
-            v-for="(option, index) in options"
-            :key="index"
-            :value="option.value"
-            :label="option.label"
-          ></el-option>
-        </el-select>
+
         <el-button style="margin-left: 12px" type="primary" plain @click="add(core)">複製</el-button>
         <el-button type="danger" :disabled="computedValue.length === 1" @click="remove(coreIndex)">刪除</el-button>
       </div>
@@ -62,8 +41,6 @@ import { VMatrixCore } from '../utils.js'
 export default {
   name: 'CoreSelector',
 
-  components: {},
-
   props: {
     modelValue: {
       type: Array,
@@ -75,6 +52,7 @@ export default {
       required: true,
     },
   },
+  emits: ['core-update'],
 
   data() {
     return {}

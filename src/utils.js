@@ -234,3 +234,20 @@ export function VMatrixCore(config) {
 
   return this
 }
+
+const LOCAL_STORAGE_KEY = 'maple-story-v-matrix-tool'
+export function getLocalStorageData() {
+  try {
+    return JSON.parse(window.localStorage.getItem(LOCAL_STORAGE_KEY))
+  } catch {
+    return null
+  }
+}
+export function saveLocalStorageData(payload) {
+  const { coreList, myJob, skills } = payload
+  const data = getLocalStorageData() || {}
+
+  data[myJob] = data[myJob] || {}
+  Object.assign(data[myJob], { coreList, skills })
+  window.localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data, null, 2))
+}

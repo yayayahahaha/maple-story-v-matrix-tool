@@ -26,17 +26,21 @@
                   <el-input
                     :placeholder="skill.placeholder"
                     v-model="skill.label"
-                    @change="skill.label = skill.label.trim()"
+                    @change="skillInputChanged(skill)"
                     :disabled="skill.disabled"
                   />
                 </el-col>
+              </el-row>
+              <el-row>
+                <!-- TODO reset button implement -->
+                <el-button type="primary" plain>重置</el-button>
               </el-row>
             </el-col>
           </el-form-item>
 
           <el-form-item label="我目前有的核心" />
 
-          <core-selector v-model="coreList" :skill-options="skills" />
+          <core-selector v-model="coreList" :skill-options="skills" @core-update="saveData" />
 
           <el-row>
             <el-col>
@@ -69,7 +73,7 @@ import FailedText from './components/FailedText.vue'
 import ChanceText from './components/ChanceText.vue'
 import Description from './components/Description.vue'
 import { jobsMap, FREE_JOB_TEXT, SUCCESS_STATUS, FAILED_STATUS, CHANCE_STATUS } from './dictionary'
-import { vMatrixTool } from './utils'
+import { vMatrixTool, getLocalStorageData, saveLocalStorageData } from './utils'
 
 export default {
   name: 'App',
@@ -136,8 +140,11 @@ export default {
 
   watch: {
     myJob() {
+      this.saveData()
+
       const flatSkills = this.skills.flat()
 
+      // 如果是自由職業
       if (this.myJob === FREE_JOB_TEXT) {
         flatSkills.forEach((skill) => Object.assign(skill, { label: '' }))
         return
@@ -186,7 +193,27 @@ export default {
     this.targetCoreNumber = 4
   },
 
+  mounted() {
+    this.loadData()
+  },
+
   methods: {
+    skillInputChanged(skill) {
+      skill.label = skill.label.trim()
+
+      this.saveData()
+    },
+    saveData() {
+      const { coreList, myJob, skills } = this
+      saveLocalStorageData({ coreList, myJob, skills })
+    },
+    loadData() {
+      const savedData = getLocalStorageData()
+      if (savedData == null) return
+
+      console.log('loadData')
+    },
+
     resetStatus() {
       this.passList = []
       this.isFailed = false
