@@ -35,6 +35,8 @@
                   </el-text>
                 </el-col>
               </el-row>
+
+              <el-button type="primary" plain @click="resetSkills">重置</el-button>
             </el-col>
           </el-form-item>
 
@@ -77,6 +79,26 @@ import Description from './components/Description.vue'
 import { jobsMap, FREE_JOB_TEXT, SUCCESS_STATUS, FAILED_STATUS, CHANCE_STATUS } from './dictionary'
 import { vMatrixTool, CURRENT_JOB_KEY, resetLocalStorage, getLocalStorageData, saveLocalStorageData } from './utils'
 
+const COLOR_SET = [
+  { effect: 'dark', type: '' },
+  { effect: 'dark', type: 'info' },
+  { effect: 'dark', type: 'success' },
+  { effect: 'dark', type: 'danger' },
+  { effect: 'dark', type: 'warning' },
+  { effect: 'light', type: '' },
+  { effect: 'light', type: 'info' },
+  { effect: 'light', type: 'success' },
+  { effect: 'light', type: 'danger' },
+  { effect: 'light', type: 'warning' },
+]
+const createSkillList = () =>
+  [...new Array(12)].map((_, index) => ({
+    label: '',
+    value: `技能 ${index + 1}`,
+    placeholder: `技能 ${index + 1}`,
+    color: COLOR_SET[index],
+  }))
+
 export default {
   name: 'App',
 
@@ -90,30 +112,11 @@ export default {
   },
 
   data() {
-    const colorSet = [
-      { effect: 'dark', type: '' },
-      { effect: 'dark', type: 'info' },
-      { effect: 'dark', type: 'success' },
-      { effect: 'dark', type: 'danger' },
-      { effect: 'dark', type: 'warning' },
-      { effect: 'light', type: '' },
-      { effect: 'light', type: 'info' },
-      { effect: 'light', type: 'success' },
-      { effect: 'light', type: 'danger' },
-      { effect: 'light', type: 'warning' },
-    ]
-    const skills = [...new Array(12)].map((_, index) => ({
-      label: '',
-      value: `技能 ${index + 1}`,
-      placeholder: `技能 ${index + 1}`,
-      color: colorSet[index],
-    }))
-
     return {
       isLoading: false, // for simulate
 
       myJob: FREE_JOB_TEXT,
-      skills,
+      skills: createSkillList(),
       coreList: [],
 
       passList: [],
@@ -152,22 +155,20 @@ export default {
         if (this.myJob === FREE_JOB_TEXT) {
           // 沒有存過, 直接清空
           if (!savedData[FREE_JOB_TEXT]?.skills) {
-            this.skills.forEach((skill) => Object.assign(skill, { label: '' }))
+            this.clearSkills()
           } else {
             this.skills = savedData[FREE_JOB_TEXT]?.skills
           }
         } else {
           // 如果是其他職業
 
-          // 沒有存過, 直接清空, 避免後面的東西沒有被清掉
-          this.skills.forEach((skill) => Object.assign(skill, { label: '' }))
-          const jobInfo = jobsMap[this.myJob]
+          // 先直接重置, 避免後面的東西沒有被清掉
+          this.clearSkills()
           if (savedData[this.myJob] != null) {
             this.skills = savedData[this.myJob].skills
           } else {
-            jobInfo.skills.forEach((skill, index) => {
-              this.skills[index].label = skill
-            })
+            // 沒有存過, 綁上寫死的技能組
+            this.resetSkills()
           }
         }
       }
@@ -202,8 +203,11 @@ export default {
       window.location.reload()
     },
 
+    clearSkills() {
+      this.skills = createSkillList()
+    },
+
     resetSkills() {
-      this.skills.forEach((skill) => Object.assign(skill, { label: '' }))
       if (this.myJob !== FREE_JOB_TEXT) {
         const jobInfo = jobsMap[this.myJob].skills
         this.skills.forEach((skill, index) => {
@@ -229,7 +233,15 @@ export default {
       this.$notify.success('已成功套用先前的操作記錄')
 
       this.myJob = savedData[CURRENT_JOB_KEY]
-      this.skills = savedData[this.myJob].skills
+      _skillPart.call(this)
+
+      function _skillPart() {
+        this.clearSkills()
+        this.skills.forEach((skill, index) => {
+          skill.label = savedData[this.myJob].skills[index].label
+        })
+      }
+
       this.coreList = savedData[this.myJob].coreList
     },
 
