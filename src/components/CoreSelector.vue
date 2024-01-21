@@ -3,7 +3,7 @@
     <el-col>
       <div
         v-for="(core, coreIndex) in computedValue"
-        style="display: flex; margin-bottom: 12px; padding: 2px"
+        style="display: flex; margin-bottom: 12px; padding: 3px"
         :key="core.id"
         class="core"
         :class="{ error: !core.validate }"
@@ -104,6 +104,7 @@ export default {
 </script>
 <style scoped>
 .core.error {
-  background-color: var(--el-color-danger);
+  border-radius: 5px;
+  background-color: var(--el-color-error-light-3);
 }
 </style>
