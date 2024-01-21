@@ -14,12 +14,7 @@
 
           <el-form-item label="我想要的技能是">
             <el-col>
-              <el-row
-                v-for="(skillRow, rowIndex) in 4"
-                :gutter="15"
-                style="margin-bottom: 20px"
-                :key="`row-${rowIndex}`"
-              >
+              <el-row v-for="(_, rowIndex) in 4" :gutter="15" style="margin-bottom: 20px" :key="`row-${rowIndex}`">
                 <el-col
                   :span="6"
                   v-for="(skill, colIndex) in 3"
@@ -27,6 +22,17 @@
                   :set="(skill = skills[rowIndex * 3 + colIndex])"
                 >
                   <el-input :placeholder="skill.placeholder" v-model="skill.label" @change="skillInputChanged(skill)" />
+                </el-col>
+              </el-row>
+
+              <el-row>
+                <el-col>
+                  <el-text
+                    >依照想要的技能組合，目標為
+                    <b
+                      ><span>{{ coreCount }}</span> 核 <span>{{ skillCount }}</span> 技</b
+                    >
+                  </el-text>
                 </el-col>
               </el-row>
             </el-col>
@@ -121,6 +127,14 @@ export default {
   computed: {
     skillMap() {
       return Object.fromEntries(this.skills.map((skill) => [skill.value, skill]))
+    },
+
+    coreCount() {
+      return Math.ceil((this.skillCount * 2) / 3)
+    },
+
+    skillCount() {
+      return this.skills.filter((skill) => skill.label !== '').length
     },
   },
 
