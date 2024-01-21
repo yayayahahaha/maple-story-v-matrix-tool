@@ -180,12 +180,19 @@ export default {
 
       function _corePart() {
         if (!savedData[this.myJob]?.coreList) {
-          this.coreList.splice(1)
-          this.coreList.forEach((core) => {
-            core.skills = core.skills.map(() => null)
-          })
+          this.resetCoreList()
         } else {
-          this.coreList = savedData[this.myJob].coreList
+          // TODO 這邊可以整合? 有兩段相似的 code, 好像也不一定要就是了
+          this.coreList = []
+          savedData[this.myJob].coreList.forEach((savedCore) => {
+            const { required, skills: originSkills } = savedCore
+            this.coreList.push(
+              new VMatrixCore({
+                required,
+                skills: originSkills.slice(),
+              })
+            )
+          })
         }
       }
     },
@@ -219,6 +226,10 @@ export default {
       this.skills = createSkillList()
     },
 
+    resetCoreList() {
+      this.coreList = [new VMatrixCore()]
+    },
+
     resetSkills() {
       if (this.myJob !== FREE_JOB_TEXT) {
         const jobInfo = jobsMap[this.myJob].skills
@@ -241,16 +252,28 @@ export default {
       this.$notify.success('已成功套用先前的操作記錄')
 
       this.myJob = savedData[CURRENT_JOB_KEY]
-      _skillPart.call(this)
+      _loadSkillPart.call(this)
+      _loadCorePart.call(this)
 
-      function _skillPart() {
+      function _loadSkillPart() {
         this.clearSkills()
         this.skills.forEach((skill, index) => {
           skill.label = savedData[this.myJob].skills[index].label
         })
       }
 
-      this.coreList = savedData[this.myJob].coreList
+      function _loadCorePart() {
+        this.coreList = []
+        savedData[this.myJob].coreList.forEach((savedCore) => {
+          const { required, skills: originSkills } = savedCore
+          this.coreList.push(
+            new VMatrixCore({
+              required,
+              skills: originSkills.slice(),
+            })
+          )
+        })
+      }
     },
 
     resetStatus() {
