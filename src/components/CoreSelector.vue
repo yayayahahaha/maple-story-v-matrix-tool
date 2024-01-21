@@ -1,7 +1,13 @@
 <template>
   <el-row>
     <el-col>
-      <div v-for="(core, coreIndex) in computedValue" style="display: flex; margin-bottom: 12px" :key="core.id">
+      <div
+        v-for="(core, coreIndex) in computedValue"
+        style="display: flex; margin-bottom: 12px; padding: 2px"
+        :key="core.id"
+        class="core"
+        :class="{ error: !core.validate }"
+      >
         <el-button @change="$emit('core-update')" @click="requiredCore(core)" :type="core.required ? 'warning' : ''">{{
           core.required ? '已指定' : '指定'
         }}</el-button>
@@ -13,7 +19,7 @@
           v-model="core.skills[index]"
           placeholder="請選擇技能"
           :filterable="false /* TODO 輸入後無法刪除? */"
-          @change="$emit('core-update')"
+          @change="coreUpdate(core)"
         >
           <el-option
             v-for="(option, index) in options"
@@ -87,6 +93,17 @@ export default {
     requiredCore(core) {
       core.required = !core.required
     },
+
+    coreUpdate(core) {
+      console.log(core)
+      core.doValidate()
+      this.$emit('core-update')
+    },
   },
 }
 </script>
+<style scoped>
+.core.error {
+  background-color: var(--el-color-danger);
+}
+</style>

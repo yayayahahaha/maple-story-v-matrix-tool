@@ -235,10 +235,15 @@ export function VMatrixCore(config) {
   // skills
   // required
   const id = v4()
-  Object.assign(this, { required: false, skills: [null, null, null] }, config, { id })
+  Object.assign(this, { required: false, skills: [null, null, null], validate: true }, config, { id })
   this.skills = this.skills.slice()
 
   return this
+}
+VMatrixCore.prototype.doValidate = function () {
+  this.validate = (() => {
+    return this.skills.length === [...new Set(this.skills)].length
+  })()
 }
 
 const LOCAL_STORAGE_KEY = 'maple-story-v-matrix-tool'
