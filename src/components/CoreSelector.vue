@@ -42,7 +42,7 @@
 </template>
 
 <script>
-import { VMatrixCore } from '../utils.js'
+import { VMatrixCore, OTHER_SKILL_VALUE } from '../utils.js'
 
 export default {
   name: 'CoreSelector',
@@ -66,7 +66,7 @@ export default {
 
   computed: {
     options() {
-      return this.skillOptions.filter((option) => option.label !== '')
+      return [...this.skillOptions.filter((option) => option.label !== ''), { value: OTHER_SKILL_VALUE, label: '其他' }]
     },
 
     computedValue: {

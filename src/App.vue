@@ -65,6 +65,7 @@ import {
   resetLocalStorage,
   getLocalStorageData,
   saveLocalStorageData,
+  OTHER_SKILL_VALUE,
 } from './utils'
 
 const COLOR_SET = [
@@ -260,15 +261,8 @@ export default {
 
     check() {
       const formatSkillList = this.skills.filter((skill) => {
-        skill.label !== ''
+        return skill.label !== ''
       })
-
-      // 空白欄位
-      const emptySkill = formatSkillList.some((skill) => skill.label === '')
-      if (emptySkill) {
-        this.$notify.error('請填滿所有「想要的技能」欄位')
-        return false
-      }
 
       // 重複技能欄位
       const skillUnique = formatSkillList.length === [...new Set(formatSkillList.map((skill) => skill.label))].length
@@ -285,7 +279,8 @@ export default {
         if (core.skills.some((skill) => skill === null)) return true
 
         // 直接用 unique 判斷
-        return core.skills.length === [...new Set(core.skills)].length
+        const list = core.skills.filter((skill) => skill !== OTHER_SKILL_VALUE)
+        return list.length === [...new Set(list)].length
       })
       if (!coreSkillsUnique) {
         this.$notify.error('在「我目前有的核心」欄位有核心出現一樣的技能，請檢查一下')
@@ -298,16 +293,25 @@ export default {
     async start() {
       if (!this.check()) return
 
+      // just for simulation
       this.isLoading = true
       await new Promise((r) => setTimeout(r, 200))
       this.isLoading = false
 
+      // 清掉上次的計算結果
       this.resetStatus()
 
-      const formatCoreList = this.coreList.filter((core) => core.skills.every((skill) => skill !== null))
+      // 排除掉沒有填寫完畢的 core
+      const formatCoreList = this.coreList.filter((core) => {
+        return core.skills.every((skill) => {
+          return skill !== null && skill !== ''
+        })
+      })
+      const formatSkillList = this.skills.filter((skill) => skill.label !== '').map((skill) => skill.label)
 
       // TODO 這裡要改掉，大改
-      const result = vMatrixTool(formatCoreList, 4)
+      const result = vMatrixTool(formatCoreList, formatSkillList)
+
       switch (result.status) {
         case SUCCESS_STATUS:
           this.passList = result.passList

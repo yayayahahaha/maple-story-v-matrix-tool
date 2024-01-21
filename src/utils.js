@@ -29,33 +29,35 @@ false && test()
 // NEXT 這裡要大改: 改成傳入 coreList 和 skillList
 // 核心數目用 skillList / 3 處理, 主要方法為不用 count 去算，要去逐一檢查每個 skill 是不是有包含兩個
 // 少一的情況要用是不是是剛好是 count 1 的都是我們要用的 skill, 也要看是不是其他的 skill 都是 2
-// ...基本上這個功能整個都怪怪的，寫的時候多檢查一下好了
-
-export function vMatrixTool(originList, purpose) {
+export function vMatrixTool(originList, targetSkills) {
+  // 全都整理成 VMatrixCore instance
   const list = originList.map((item) => {
     if (item instanceof VMatrixCore) return item
     return new VMatrixCore({ skills: item, required: false })
   })
 
-  // required 的核心 map
+  // 指定的核心的 map
   const requriedCoreMap = Object.fromEntries(list.filter((core) => core.required).map((item) => [item.id, item]))
   const hasRequiredCore = Object.keys(requriedCoreMap).length !== 0
 
   const passList = []
 
-  // 排除開頭一樣的組合 和沒有包含 requried 核心的組合
+  // 排除開頭一樣的組合 和沒有包含指定核心的組合
   const unFilteredCombinations = _uniqueCombinationOfArray(list).filter((combination) => {
-    // 開頭
+    // 開頭一樣
     if (_checkHasStartWithSame(combination)) return false
 
-    // required
+    // 指定核心
     if (!hasRequiredCore) return true
     return Object.keys(requriedCoreMap).every((requiredCoreId) => {
       return combination.find((core) => core.id === requiredCoreId)
     })
   })
 
+  // 整理完畢，正式開始
+
   // 過濾出需求數目的組合 (四核六技 or 六核九技)
+  const purpose = Math.ceil((targetSkills.length * 2) / 3)
   const allCombinations = unFilteredCombinations.filter((skills) => skills.length === purpose)
 
   // 是否成功
@@ -242,9 +244,13 @@ export function VMatrixCore(config) {
 }
 VMatrixCore.prototype.doValidate = function () {
   this.validate = (() => {
-    return this.skills.length === [...new Set(this.skills)].length
+    const list = this.skills.filter((skill) => skill !== OTHER_SKILL_VALUE && skill != null)
+    const sameLength = list.length === [...new Set(list)].length
+
+    return sameLength
   })()
 }
+export const OTHER_SKILL_VALUE = v4()
 
 const LOCAL_STORAGE_KEY = 'maple-story-v-matrix-tool'
 export const CURRENT_JOB_KEY = 'CURRENT_JOB'
