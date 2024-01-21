@@ -60,7 +60,7 @@ export default {
 
   computed: {
     options() {
-      return this.skillOptions.flat().filter((option) => option.label !== '')
+      return this.skillOptions.filter((option) => option.label !== '')
     },
 
     computedValue: {

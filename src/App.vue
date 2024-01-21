@@ -14,13 +14,20 @@
 
           <el-form-item label="我想要的技能是">
             <el-col>
-              <el-row v-for="(skillRow, rowIndex) in skills" :key="rowIndex" :gutter="15" style="margin-bottom: 20px">
-                <el-col :span="6" v-for="(skill, index) in skillRow" :key="index">
+              <el-row
+                v-for="(skillRow, rowIndex) in 4"
+                :gutter="15"
+                style="margin-bottom: 20px"
+                :key="`row-${rowIndex}`"
+              >
+                <el-col
+                  :span="6"
+                  v-for="(skill, colIndex) in 3"
+                  :key="`col-${colIndex}`"
+                  :set="(skill = skills[rowIndex * 3 + colIndex])"
+                >
                   <el-input :placeholder="skill.placeholder" v-model="skill.label" @change="skillInputChanged(skill)" />
                 </el-col>
-              </el-row>
-              <el-row>
-                <el-button type="primary" plain @click="resetSkills">重置</el-button>
               </el-row>
             </el-col>
           </el-form-item>
@@ -89,20 +96,12 @@ export default {
       { effect: 'light', type: 'danger' },
       { effect: 'light', type: 'warning' },
     ]
-
-    const skills = [...new Array(12)]
-      .map((_, index) => ({
-        label: '',
-        value: `技能 ${index + 1}`,
-        placeholder: `技能 ${index + 1}`,
-        color: colorSet[index],
-      }))
-      .reduce((list, skill, index) => {
-        const listIndex = Math.floor(index / 3)
-        list[listIndex] = list[listIndex] || []
-        list[listIndex].push(skill)
-        return list
-      }, [])
+    const skills = [...new Array(12)].map((_, index) => ({
+      label: '',
+      value: `技能 ${index + 1}`,
+      placeholder: `技能 ${index + 1}`,
+      color: colorSet[index],
+    }))
 
     return {
       isLoading: false, // for simulate
@@ -121,13 +120,12 @@ export default {
 
   computed: {
     skillMap() {
-      return Object.fromEntries(this.skills.flat().map((skill) => [skill.value, skill]))
+      return Object.fromEntries(this.skills.map((skill) => [skill.value, skill]))
     },
   },
 
   watch: {
     myJob() {
-      const flatSkills = this.skills.flat()
       const savedData = getLocalStorageData() || {}
 
       _skillPart.call(this)
@@ -140,7 +138,7 @@ export default {
         if (this.myJob === FREE_JOB_TEXT) {
           // 沒有存過, 直接清空
           if (!savedData[FREE_JOB_TEXT]?.skills) {
-            this.skills.flat().forEach((skill) => Object.assign(skill, { label: '' }))
+            this.skills.forEach((skill) => Object.assign(skill, { label: '' }))
           } else {
             this.skills = savedData[FREE_JOB_TEXT]?.skills
           }
@@ -148,13 +146,13 @@ export default {
           // 如果是其他職業
 
           // 沒有存過, 直接清空, 避免後面的東西沒有被清掉
-          this.skills.flat().forEach((skill) => Object.assign(skill, { label: '' }))
+          this.skills.forEach((skill) => Object.assign(skill, { label: '' }))
           const jobInfo = jobsMap[this.myJob]
           if (savedData[this.myJob] != null) {
             this.skills = savedData[this.myJob].skills
           } else {
             jobInfo.skills.forEach((skill, index) => {
-              flatSkills[index].label = skill
+              this.skills[index].label = skill
             })
           }
         }
@@ -191,10 +189,10 @@ export default {
     },
 
     resetSkills() {
-      this.skills.flat().forEach((skill) => Object.assign(skill, { label: '' }))
+      this.skills.forEach((skill) => Object.assign(skill, { label: '' }))
       if (this.myJob !== FREE_JOB_TEXT) {
         const jobInfo = jobsMap[this.myJob].skills
-        this.skills.flat().forEach((skill, index) => {
+        this.skills.forEach((skill, index) => {
           skill.label = jobInfo[index] || ''
         })
       }
@@ -228,7 +226,7 @@ export default {
     },
 
     check() {
-      const formatSkillList = this.skills.flat().filter((skill) => {
+      const formatSkillList = this.skills.filter((skill) => {
         skill.label !== ''
       })
 
