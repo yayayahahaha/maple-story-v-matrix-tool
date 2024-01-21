@@ -73,12 +73,6 @@ export default {
     },
   },
 
-  watch: {},
-
-  created() {
-    if (this.computedValue.length < 1) this.add()
-  },
-
   methods: {
     add(core = {}) {
       this.computedValue.push(new VMatrixCore(core))

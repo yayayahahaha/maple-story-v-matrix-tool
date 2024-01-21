@@ -77,7 +77,14 @@ import FailedText from './components/FailedText.vue'
 import ChanceText from './components/ChanceText.vue'
 import Description from './components/Description.vue'
 import { jobsMap, FREE_JOB_TEXT, SUCCESS_STATUS, FAILED_STATUS, CHANCE_STATUS } from './dictionary'
-import { vMatrixTool, CURRENT_JOB_KEY, resetLocalStorage, getLocalStorageData, saveLocalStorageData } from './utils'
+import {
+  VMatrixCore,
+  vMatrixTool,
+  CURRENT_JOB_KEY,
+  resetLocalStorage,
+  getLocalStorageData,
+  saveLocalStorageData,
+} from './utils'
 
 const COLOR_SET = [
   { effect: 'dark', type: '' },
@@ -122,8 +129,6 @@ export default {
       passList: [],
       isFailed: false,
       chancePayload: [],
-
-      dataLoaded: false,
     }
   },
 
@@ -187,11 +192,18 @@ export default {
   },
 
   mounted() {
+    this.defaultSetting()
+
     this.loadData()
     window.vm = this
   },
 
   methods: {
+    defaultSetting() {
+      // default core
+      this.coreList.push(new VMatrixCore())
+    },
+
     skillInputChanged(skill) {
       skill.label = skill.label.trim()
 
@@ -218,15 +230,11 @@ export default {
     },
 
     saveData() {
-      if (!this.dataLoaded) return
-
       const { coreList, myJob, skills } = this
       saveLocalStorageData({ coreList, myJob, skills })
     },
 
     loadData() {
-      this.dataLoaded = true // to avoid core-update refresh page
-
       const savedData = getLocalStorageData()
       if (savedData == null) return
 
