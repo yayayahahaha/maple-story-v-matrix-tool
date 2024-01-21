@@ -13,31 +13,11 @@
           </el-form-item>
 
           <el-form-item label="我想要的技能是">
-            <el-col>
-              <el-row v-for="(_, rowIndex) in 4" :gutter="15" style="margin-bottom: 20px" :key="`row-${rowIndex}`">
-                <el-col
-                  :span="6"
-                  v-for="(skill, colIndex) in 3"
-                  :key="`col-${colIndex}`"
-                  :set="(skill = skills[rowIndex * 3 + colIndex])"
-                >
-                  <el-input :placeholder="skill.placeholder" v-model="skill.label" @change="skillInputChanged(skill)" />
-                </el-col>
-              </el-row>
-
-              <el-row>
-                <el-col>
-                  <el-text
-                    >依照想要的技能組合，目標為
-                    <b
-                      ><span>{{ coreCount }}</span> 核 <span>{{ skillCount }}</span> 技</b
-                    >
-                  </el-text>
-                </el-col>
-              </el-row>
-
-              <el-button type="primary" plain @click="resetSkills">重置</el-button>
-            </el-col>
+            <skills-input
+              v-model="skills"
+              @skill-input-changed="skillInputChanged($event)"
+              @reset-skills="resetSkills"
+            />
           </el-form-item>
 
           <el-form-item label="我目前有的核心" />
@@ -70,6 +50,7 @@
 </template>
 
 <script>
+import SkillsInput from './components/SkillsInput.vue'
 import JobSelector from './components/JobSelector.vue'
 import CoreSelector from './components/CoreSelector.vue'
 import SuccessText from './components/SuccessText.vue'
@@ -110,6 +91,7 @@ export default {
   name: 'App',
 
   components: {
+    SkillsInput,
     JobSelector,
     CoreSelector,
     SuccessText,
@@ -135,14 +117,6 @@ export default {
   computed: {
     skillMap() {
       return Object.fromEntries(this.skills.map((skill) => [skill.value, skill]))
-    },
-
-    coreCount() {
-      return Math.ceil((this.skillCount * 2) / 3)
-    },
-
-    skillCount() {
-      return this.skills.filter((skill) => skill.label !== '').length
     },
   },
 
@@ -236,6 +210,8 @@ export default {
         this.skills.forEach((skill, index) => {
           skill.label = jobInfo[index] || ''
         })
+      } else {
+        this.clearSkills()
       }
       this.saveData()
     },
