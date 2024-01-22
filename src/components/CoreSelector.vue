@@ -95,7 +95,6 @@ export default {
     },
 
     coreUpdate(core) {
-      console.log(core)
       core.doValidate()
       this.$emit('core-update')
     },

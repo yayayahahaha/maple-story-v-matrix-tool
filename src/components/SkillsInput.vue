@@ -59,13 +59,5 @@ export default {
       return this.computedValue.filter((skill) => skill.label !== '').length
     },
   },
-
-  watch: {},
-
-  created() {
-    console.log(this.computedValue)
-  },
-
-  methods: {},
 }
 </script>

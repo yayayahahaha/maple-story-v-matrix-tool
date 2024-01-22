@@ -79,6 +79,8 @@ const COLOR_SET = [
   { effect: 'light', type: 'success' },
   { effect: 'light', type: 'danger' },
   { effect: 'light', type: 'warning' },
+  { effect: 'plain', type: '' },
+  { effect: 'plain', type: 'success' },
 ]
 const createSkillList = () =>
   [...new Array(12)].map((_, index) => ({
@@ -123,6 +125,8 @@ export default {
 
   watch: {
     myJob() {
+      this.resetStatus()
+
       const savedData = getLocalStorageData() || {}
 
       _skillPart.call(this)
@@ -307,7 +311,7 @@ export default {
           return skill !== null && skill !== ''
         })
       })
-      const formatSkillList = this.skills.filter((skill) => skill.label !== '').map((skill) => skill.label)
+      const formatSkillList = this.skills.filter((skill) => skill.label !== '').map((skill) => skill.value)
 
       // TODO 這裡要改掉，大改
       const result = vMatrixTool(formatCoreList, formatSkillList)

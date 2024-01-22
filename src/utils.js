@@ -56,17 +56,20 @@ export function vMatrixTool(originList, targetSkills) {
 
   // 整理完畢，正式開始
 
-  // 過濾出需求數目的組合 (四核六技 or 六核九技)
+  // 過濾出需求技能數目的最低核心數目
   const purpose = Math.ceil((targetSkills.length * 2) / 3)
   const allCombinations = unFilteredCombinations.filter((skills) => skills.length === purpose)
+
+  // 這個時候的排列組合: 已經沒有開頭一樣的 / 沒有不包含指定核心的 / 也沒有有選項是空的(在外層處理)
 
   // 是否成功
   allCombinations.forEach((combination) => {
     // 計算出每一個排列組合所囊誇的技能總數
     const combinationCount = _countSkillsOfEach(combination)
+    console.log('combinationCount:', combinationCount)
 
-    // 判斷是不是每個技能都有兩個
-    const successCombination = Object.keys(combinationCount).every((skill) => combinationCount[skill] === 2)
+    // 檢查是不是每個有需要的技能都有兩個
+    const successCombination = targetSkills.every((targetSkill) => combinationCount[targetSkill] === 2)
 
     if (successCombination) passList.push(combination)
   })
@@ -250,7 +253,7 @@ VMatrixCore.prototype.doValidate = function () {
     return sameLength
   })()
 }
-export const OTHER_SKILL_VALUE = v4()
+export const OTHER_SKILL_VALUE = '________________________________________' // for unique
 
 const LOCAL_STORAGE_KEY = 'maple-story-v-matrix-tool'
 export const CURRENT_JOB_KEY = 'CURRENT_JOB'
