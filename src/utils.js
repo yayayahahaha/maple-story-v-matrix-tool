@@ -66,10 +66,9 @@ export function vMatrixTool(originList, targetSkills) {
   allCombinations.forEach((combination) => {
     // 計算出每一個排列組合所囊誇的技能總數
     const combinationCount = _countSkillsOfEach(combination)
-    console.log('combinationCount:', combinationCount)
 
     // 檢查是不是每個有需要的技能都有兩個
-    const successCombination = targetSkills.every((targetSkill) => combinationCount[targetSkill] === 2)
+    const successCombination = targetSkills.every((targetSkill) => combinationCount[targetSkill] >= 2)
 
     if (successCombination) passList.push(combination)
   })
@@ -80,60 +79,34 @@ export function vMatrixTool(originList, targetSkills) {
   const missOneList = unFilteredCombinations.filter((skills) => skills.length === purpose - 1)
 
   const chanceList = missOneList.reduce((chanceList, coreList) => {
-    const conbinationCount = _countSkillsOfEach(coreList)
+    const combinationCount = _countSkillsOfEach(coreList)
+    const integrateCount = targetSkills.reduce(
+      (map, skill) => {
+        if (combinationCount[skill] >= 2) map.pass.push(coreList)
+        else if (combinationCount[skill] === 1) map.missOne.push(coreList)
+        else map.zero.push(coreList)
 
-    // 整理: { [相同技能數量的技能數]: { count: 幾個技能的技能數量是這個n, skillList: [是哪些技能] } }
-    const skillCount = Object.keys(conbinationCount).reduce((map, skill) => {
-      map[conbinationCount[skill]] = map[conbinationCount[skill]] || {
-        count: 0,
-        skillList: [],
-      }
-      map[conbinationCount[skill]].count++
-      map[conbinationCount[skill]].skillList.push(skill)
+        return map
+      },
+      { pass: [], missOne: [], zero: [] }
+    )
 
-      return map
-    }, {})
-
-    // 如果沒有一個技能是只有 1 個的話，後面不用處理
-    // ex: [ '共鳴', '魔咒', '藝術' ], [ '魔咒', '衝刺', '共鳴' ], [ '共鳴', '藝術', '衝刺' ]
-    // 其中 { 共鳴: 3, 魔咒: 2, 藝術: 2, 衝刺: 2 }
-    // 如果剛好只數到 1 個的技能有 3 個、且其他的技能都有 2 個的話，就代表只剩這顆。
-    if (skillCount[2]?.count === 3 && skillCount[1]?.count === 3) {
-      const firstSkill = coreList
-        .map((core) => core.skills[0])
-        .find((startSkill) => skillCount[1].skillList.find((count1Skill) => startSkill === count1Skill))
-
-      chanceList.push({
-        firstCannot: firstSkill || null,
-        neededOne: skillCount[1].skillList,
-        coreList,
-      })
-    }
-
+    const { missOne, zero } = integrateCount
+    if (missOne.length <= 3 && zero.length === 0) chanceList.push(coreList)
     return chanceList
   }, [])
 
   if (chanceList.length === 0) return { status: FAILED_STATUS }
   else {
-    const payload = chanceList.reduce((map, payload) => {
-      const { firstCannot, neededOne } = payload
+    // TODO 這些都是在那種 4 核 5 技
+    // TODO 沒有其他，差的那顆也沒有其他的
+    // TODO 沒有其他，差的那顆是其他的
+    // TODO 有其他，差的那顆不是其他的
+    // TODO 有其他，差的那顆是其他的 (這個應該不會有
+    console.log('好機會')
+    console.log(JSON.parse(JSON.stringify(chanceList, null, 2)))
 
-      const pkList = neededOne.sort((a, b) => a.localeCompare(b))
-      const pk = pkList.join(', ')
-      map[pk] = map[pk] || {
-        allAllow: false,
-        coreList: [],
-        firstCannotList: [],
-      }
-
-      map[pk].coreList.push(payload)
-      map[pk].allAllow = map[pk].allAllow || firstCannot == null
-      if (!map[pk].allAllow) map[pk].firstCannotList.push(firstCannot)
-      map[pk].firstCannotList = [...new Set(map[pk].firstCannotList)]
-
-      return map
-    }, {})
-    return { status: CHANCE_STATUS, payload }
+    return {}
   }
 
   /**
