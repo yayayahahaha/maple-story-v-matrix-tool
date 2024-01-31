@@ -53,7 +53,7 @@ export function vMatrixTool(originList, targetSkills) {
   // 整理完畢，正式開始
 
   // 過濾出需求技能數目的最低核心數目
-  const purpose = Math.ceil((targetSkills.length * 2) / 3)
+  const purpose = targetSkills.length === 1 ? 2 : Math.ceil((targetSkills.length * 2) / 3)
   const allCombinations = unFilteredCombinations.filter((skills) => skills.length === purpose)
 
   // 這個時候的排列組合: 已經沒有開頭一樣的 / 沒有不包含指定核心的 / 也沒有有選項是空的(在外層處理)
