@@ -98,23 +98,22 @@ export function vMatrixTool(originList, targetSkills) {
   // TODO 沒有其他，差的那顆是其他的
   // TODO 有其他，差的那顆不是其他的
   // TODO 有其他，差的那顆是其他的 (這個應該不會有
+
   // 雖然沒有找到 ok 的組合，但有只差一顆的組合
   const chanceResult = chanceList.reduce((list, chancePayload) => {
     const { integrateCount, coreList, combinationCount } = chancePayload
     const currentFirstSkillMap = Object.fromEntries(coreList.map((core) => [core.skills[0], true]))
 
-    // TODO 還要考慮一下有'其他'的場景
-    const firstCanBeList = integrateCount.missOne
-      .map((missOneSkill) => (!currentFirstSkillMap[missOneSkill] ? missOneSkill : false))
-      .filter(Boolean)
+    const firstCanBeList = integrateCount.missOne.filter((missOneSkill) => !currentFirstSkillMap[missOneSkill])
 
-    // 如果缺的技能都在第一個的話，代表雖然缺但也不行，就不推了、只推不是 0 的
-    if (firstCanBeList.length !== 0) list.push({ firstCanBeList, integrateCount, coreList, combinationCount })
+    // 如果缺的技能都在第一個的話，代表雖然缺但也不行，就不推了、只推不是 0 的,
+    // 或是缺的技能數量少於 3 , 代表可以接受其他? TODO 這點目前還沒找到測試資料
+    if (firstCanBeList.length !== 0 || integrateCount.missOne.length < 3) {
+      list.push({ firstCanBeList, integrateCount, coreList, combinationCount })
+    }
 
     return list
   }, [])
-
-  console.log('chanceResult:', chanceResult)
 
   // 不僅沒有找到 ok 的核心組合，也沒有只差一顆的組合
   if (chanceResult.length === 0) return { status: FAILED_STATUS }
