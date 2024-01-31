@@ -13,12 +13,15 @@
           </el-form-item>
 
           <el-form-item label="我想要的技能是">
-            <el-col>
-              <el-row v-for="(skillRow, rowIndex) in skills" :key="rowIndex" :gutter="15" style="margin-bottom: 20px">
-                <el-col :span="6" v-for="(skill, index) in skillRow" :key="index">
-                  <el-input :placeholder="skill.placeholder" v-model="skill.label" @change="skillInputChanged(skill)" />
-                </el-col>
+            <skills-input v-model="skills" @skill-input-changed="skillInputChanged($event)" />
+
+            <el-col v-if="skillHasSlot">
+              <el-row>
+                <allow-three-skills v-model="allowThreeSkills" />
               </el-row>
+            </el-col>
+
+            <el-col>
               <el-row>
                 <el-button type="primary" plain @click="resetSkills">重置</el-button>
               </el-row>
@@ -55,81 +58,106 @@
 </template>
 
 <script>
+import SkillsInput from './components/SkillsInput.vue'
 import JobSelector from './components/JobSelector.vue'
 import CoreSelector from './components/CoreSelector.vue'
 import SuccessText from './components/SuccessText.vue'
 import FailedText from './components/FailedText.vue'
 import ChanceText from './components/ChanceText.vue'
 import Description from './components/Description.vue'
+import AllowThreeSkills from './components/AllowThreeSkills.vue'
 import { jobsMap, FREE_JOB_TEXT, SUCCESS_STATUS, FAILED_STATUS, CHANCE_STATUS } from './dictionary'
-import { vMatrixTool, CURRENT_JOB_KEY, resetLocalStorage, getLocalStorageData, saveLocalStorageData } from './utils'
+import {
+  VMatrixCore,
+  vMatrixTool,
+  CURRENT_JOB_KEY,
+  resetLocalStorage,
+  getLocalStorageData,
+  saveLocalStorageData,
+  OTHER_SKILL_VALUE,
+  OTHER_SKILL_LABEL,
+} from './utils'
+
+const COLOR_SET = [
+  { effect: 'dark', type: '' },
+  { effect: 'dark', type: 'info' },
+  { effect: 'dark', type: 'success' },
+  { effect: 'dark', type: 'danger' },
+  { effect: 'dark', type: 'warning' },
+  { effect: 'light', type: '' },
+  { effect: 'light', type: 'info' },
+  { effect: 'light', type: 'success' },
+  { effect: 'light', type: 'danger' },
+  { effect: 'light', type: 'warning' },
+  { effect: 'plain', type: '' },
+  { effect: 'plain', type: 'success' },
+]
+const createSkillList = () =>
+  [...new Array(12)].map((_, index) => ({
+    label: '',
+    value: `技能 ${index + 1}`,
+    placeholder: `技能 ${index + 1}`,
+    color: COLOR_SET[index],
+  }))
 
 export default {
   name: 'App',
 
   components: {
+    SkillsInput,
     JobSelector,
     CoreSelector,
     SuccessText,
     FailedText,
     ChanceText,
     Description,
+    AllowThreeSkills,
   },
 
   data() {
-    const colorSet = [
-      { effect: 'dark', type: '' },
-      { effect: 'dark', type: 'info' },
-      { effect: 'dark', type: 'success' },
-      { effect: 'dark', type: 'danger' },
-      { effect: 'dark', type: 'warning' },
-      { effect: 'light', type: '' },
-      { effect: 'light', type: 'info' },
-      { effect: 'light', type: 'success' },
-      { effect: 'light', type: 'danger' },
-      { effect: 'light', type: 'warning' },
-    ]
-
-    const skills = [...new Array(12)]
-      .map((_, index) => ({
-        label: '',
-        value: `技能 ${index + 1}`,
-        placeholder: `技能 ${index + 1}`,
-        color: colorSet[index],
-      }))
-      .reduce((list, skill, index) => {
-        const listIndex = Math.floor(index / 3)
-        list[listIndex] = list[listIndex] || []
-        list[listIndex].push(skill)
-        return list
-      }, [])
-
-    console.log('skills:', skills)
-
     return {
       isLoading: false, // for simulate
 
+      allowThreeSkills: true,
+
       myJob: FREE_JOB_TEXT,
-      skills,
+      skills: createSkillList(),
       coreList: [],
 
       passList: [],
       isFailed: false,
       chancePayload: [],
-
-      dataLoaded: false,
     }
   },
 
   computed: {
+    skillHasSlot() {
+      const filledSkillListLength = this.skills.filter((skill) => skill.label).length
+      return Math.floor((filledSkillListLength * 2) / 3) !== Math.ceil((filledSkillListLength * 2) / 3)
+    },
+
     skillMap() {
-      return Object.fromEntries(this.skills.flat().map((skill) => [skill.value, skill]))
+      return Object.fromEntries(
+        this.skills
+          .map((skill) => [skill.value, skill])
+          .concat([
+            [
+              OTHER_SKILL_VALUE,
+              {
+                color: {},
+                label: OTHER_SKILL_LABEL,
+                value: OTHER_SKILL_VALUE,
+              },
+            ],
+          ])
+      )
     },
   },
 
   watch: {
     myJob() {
-      const flatSkills = this.skills.flat()
+      this.resetStatus()
+
       const savedData = getLocalStorageData() || {}
 
       _skillPart.call(this)
@@ -142,45 +170,57 @@ export default {
         if (this.myJob === FREE_JOB_TEXT) {
           // 沒有存過, 直接清空
           if (!savedData[FREE_JOB_TEXT]?.skills) {
-            this.skills.flat().forEach((skill) => Object.assign(skill, { label: '' }))
+            this.clearSkills()
           } else {
             this.skills = savedData[FREE_JOB_TEXT]?.skills
           }
         } else {
           // 如果是其他職業
 
-          // 沒有存過, 直接清空, 避免後面的東西沒有被清掉
-          this.skills.flat().forEach((skill) => Object.assign(skill, { label: '' }))
-          const jobInfo = jobsMap[this.myJob]
+          // 先直接重置, 避免後面的東西沒有被清掉
+          this.clearSkills()
           if (savedData[this.myJob] != null) {
             this.skills = savedData[this.myJob].skills
           } else {
-            jobInfo.skills.forEach((skill, index) => {
-              flatSkills[index].label = skill
-            })
+            // 沒有存過, 綁上寫死的技能組
+            this.resetSkills()
           }
         }
       }
 
       function _corePart() {
         if (!savedData[this.myJob]?.coreList) {
-          this.coreList.splice(1)
-          this.coreList.forEach((core) => {
-            core.skills = core.skills.map(() => null)
-          })
+          this.resetCoreList()
         } else {
-          this.coreList = savedData[this.myJob].coreList
+          // TODO 這邊可以整合? 有兩段相似的 code, 好像也不一定要就是了
+          this.coreList = []
+          savedData[this.myJob].coreList.forEach((savedCore) => {
+            const { required, skills: originSkills } = savedCore
+            this.coreList.push(
+              new VMatrixCore({
+                required,
+                skills: originSkills.slice(),
+              })
+            )
+          })
         }
       }
     },
   },
 
   mounted() {
+    this.defaultSetting()
+
     this.loadData()
     window.vm = this
   },
 
   methods: {
+    defaultSetting() {
+      // default core
+      this.coreList.push(new VMatrixCore())
+    },
+
     skillInputChanged(skill) {
       skill.label = skill.label.trim()
 
@@ -192,33 +232,60 @@ export default {
       window.location.reload()
     },
 
+    clearSkills() {
+      this.skills = createSkillList()
+    },
+
+    resetCoreList() {
+      this.coreList = [new VMatrixCore()]
+    },
+
     resetSkills() {
-      this.skills.flat().forEach((skill) => Object.assign(skill, { label: '' }))
       if (this.myJob !== FREE_JOB_TEXT) {
         const jobInfo = jobsMap[this.myJob].skills
-        this.skills.flat().forEach((skill, index) => {
+        this.skills.forEach((skill, index) => {
           skill.label = jobInfo[index] || ''
         })
+      } else {
+        this.clearSkills()
       }
       this.saveData()
     },
 
     saveData() {
-      if (!this.dataLoaded) return
-
       const { coreList, myJob, skills } = this
       saveLocalStorageData({ coreList, myJob, skills })
     },
 
     loadData() {
-      this.dataLoaded = true // to avoid core-update refresh page
-
       const savedData = getLocalStorageData()
       if (savedData == null) return
 
+      this.$notify.success('已成功套用先前的操作記錄')
+
       this.myJob = savedData[CURRENT_JOB_KEY]
-      this.skills = savedData[this.myJob].skills
-      this.coreList = savedData[this.myJob].coreList
+      _loadSkillPart.call(this)
+      _loadCorePart.call(this)
+
+      function _loadSkillPart() {
+        this.clearSkills()
+        this.skills.forEach((skill, index) => {
+          skill.label = savedData[this.myJob].skills[index].label
+        })
+      }
+
+      function _loadCorePart() {
+        this.coreList = []
+        savedData[this.myJob].coreList.forEach((savedCore) => {
+          const { required, skills: originSkills } = savedCore
+          this.coreList.push(
+            new VMatrixCore({
+              required,
+              skills: originSkills.slice(),
+            })
+          )
+        })
+      }
     },
 
     resetStatus() {
@@ -228,16 +295,9 @@ export default {
     },
 
     check() {
-      const formatSkillList = this.skills.flat().filter((skill) => {
-        skill.label !== ''
+      const formatSkillList = this.skills.filter((skill) => {
+        return skill.label !== ''
       })
-
-      // 空白欄位
-      const emptySkill = formatSkillList.some((skill) => skill.label === '')
-      if (emptySkill) {
-        this.$notify.error('請填滿所有「想要的技能」欄位')
-        return false
-      }
 
       // 重複技能欄位
       const skillUnique = formatSkillList.length === [...new Set(formatSkillList.map((skill) => skill.label))].length
@@ -254,7 +314,8 @@ export default {
         if (core.skills.some((skill) => skill === null)) return true
 
         // 直接用 unique 判斷
-        return core.skills.length === [...new Set(core.skills)].length
+        const list = core.skills.filter((skill) => skill !== OTHER_SKILL_VALUE)
+        return list.length === [...new Set(list)].length
       })
       if (!coreSkillsUnique) {
         this.$notify.error('在「我目前有的核心」欄位有核心出現一樣的技能，請檢查一下')
@@ -267,19 +328,29 @@ export default {
     async start() {
       if (!this.check()) return
 
+      // just for simulation
       this.isLoading = true
       await new Promise((r) => setTimeout(r, 200))
       this.isLoading = false
 
+      // 清掉上次的計算結果
       this.resetStatus()
 
-      const formatCoreList = this.coreList.filter((core) => core.skills.every((skill) => skill !== null))
+      // 排除掉沒有填寫完畢的 core
+      const formatCoreList = this.coreList.filter((core) => {
+        return core.skills.every((skill) => {
+          return skill !== null && skill !== ''
+        })
+      })
+      const formatSkillList = this.skills.filter((skill) => skill.label !== '').map((skill) => skill.value)
 
-      // TODO 這裡要改掉，大改
-      const result = vMatrixTool(formatCoreList, 4)
+      const result = vMatrixTool(formatCoreList, formatSkillList, { allowThreeSkills: this.allowThreeSkills })
       switch (result.status) {
         case SUCCESS_STATUS:
-          this.passList = result.passList
+          // do duplicate avoid sync update
+          this.passList = result.passList.map((coreList) => {
+            return coreList.map((core) => new VMatrixCore({ ...core, skills: core.skills.slice() }))
+          })
           break
 
         case FAILED_STATUS:

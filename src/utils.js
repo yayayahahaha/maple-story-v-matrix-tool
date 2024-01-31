@@ -25,40 +25,51 @@ function test() {
 }
 false && test()
 
-export function vMatrixTool(originList, purpose) {
+export function vMatrixTool(originList, targetSkills, config) {
+  const { allowThreeSkills = true } = config
+
+  // 全都整理成 VMatrixCore instance
   const list = originList.map((item) => {
     if (item instanceof VMatrixCore) return item
     return new VMatrixCore({ skills: item, required: false })
   })
 
-  // required 的核心 map
+  // 指定的核心的 map
   const requriedCoreMap = Object.fromEntries(list.filter((core) => core.required).map((item) => [item.id, item]))
   const hasRequiredCore = Object.keys(requriedCoreMap).length !== 0
 
   const passList = []
 
-  // 排除開頭一樣的組合 和沒有包含 requried 核心的組合
+  // 排除開頭一樣的組合 和沒有包含指定核心的組合
   const unFilteredCombinations = _uniqueCombinationOfArray(list).filter((combination) => {
-    // 開頭
+    // 開頭一樣
     if (_checkHasStartWithSame(combination)) return false
 
-    // required
+    // 指定核心
     if (!hasRequiredCore) return true
     return Object.keys(requriedCoreMap).every((requiredCoreId) => {
       return combination.find((core) => core.id === requiredCoreId)
     })
   })
 
-  // 過濾出需求數目的組合 (四核六技 or 六核九技)
+  // 整理完畢，正式開始
+
+  // 過濾出需求技能數目的最低核心數目: 如果有要 1 個技能的話，也是要 2 顆核心
+  const purpose = targetSkills.length === 1 ? 2 : Math.ceil((targetSkills.length * 2) / 3)
   const allCombinations = unFilteredCombinations.filter((skills) => skills.length === purpose)
+
+  // 這個時候的排列組合: 已經沒有開頭一樣的 / 沒有不包含指定核心的 / 也沒有有選項是空的(在外層處理)
 
   // 是否成功
   allCombinations.forEach((combination) => {
     // 計算出每一個排列組合所囊誇的技能總數
     const combinationCount = _countSkillsOfEach(combination)
 
-    // 判斷是不是每個技能都有兩個
-    const successCombination = Object.keys(combinationCount).every((skill) => combinationCount[skill] === 2)
+    // 檢查是不是每個有需要的技能都有兩個
+    const successCombination = targetSkills.every((targetSkill) => {
+      if (allowThreeSkills) return combinationCount[targetSkill] >= 2
+      return combinationCount[targetSkill] === 2
+    })
 
     if (successCombination) passList.push(combination)
   })
@@ -69,61 +80,59 @@ export function vMatrixTool(originList, purpose) {
   const missOneList = unFilteredCombinations.filter((skills) => skills.length === purpose - 1)
 
   const chanceList = missOneList.reduce((chanceList, coreList) => {
-    const conbinationCount = _countSkillsOfEach(coreList)
+    const combinationCount = _countSkillsOfEach(coreList)
 
-    // 整理: { [相同技能數量的技能數]: { count: 幾個技能的技能數量是這個n, skillList: [是哪些技能] } }
-    const skillCount = Object.keys(conbinationCount).reduce((map, skill) => {
-      map[conbinationCount[skill]] = map[conbinationCount[skill]] || {
-        count: 0,
-        skillList: [],
+    const integrateCount = targetSkills.reduce(
+      (map, skill) => {
+        // pass
+        if (combinationCount[skill] >= 2) {
+          if (allowThreeSkills) map.pass.push(skill)
+          else if (combinationCount[skill] === 2) map.pass.push(skill)
+          else map.over.push(skill)
+        }
+        // missOne
+        else if (combinationCount[skill] === 1) map.missOne.push(skill)
+        // zero
+        else map.zero.push(skill)
+
+        return map
+      },
+      {
+        pass: [],
+        missOne: [],
+        zero: [],
+        over: [], // allowThreeSkills 是 false 的時候會有的
       }
-      map[conbinationCount[skill]].count++
-      map[conbinationCount[skill]].skillList.push(skill)
+    )
 
-      return map
-    }, {})
-
-    // 如果沒有一個技能是只有 1 個的話，後面不用處理
-    // ex: [ '共鳴', '魔咒', '藝術' ], [ '魔咒', '衝刺', '共鳴' ], [ '共鳴', '藝術', '衝刺' ]
-    // 其中 { 共鳴: 3, 魔咒: 2, 藝術: 2, 衝刺: 2 }
-    // 如果剛好只數到 1 個的技能有 3 個、且其他的技能都有 2 個的話，就代表只剩這顆。
-    if (skillCount[2]?.count === 3 && skillCount[1]?.count === 3) {
-      const firstSkill = coreList
-        .map((core) => core.skills[0])
-        .find((startSkill) => skillCount[1].skillList.find((count1Skill) => startSkill === count1Skill))
-
-      chanceList.push({
-        firstCannot: firstSkill || null,
-        neededOne: skillCount[1].skillList,
-        coreList,
-      })
+    const { missOne, zero, over } = integrateCount
+    if (missOne.length <= 3 && zero.length === 0 && over.length === 0) {
+      chanceList.push({ coreList, integrateCount, combinationCount })
     }
 
     return chanceList
   }, [])
 
-  if (chanceList.length === 0) return { status: FAILED_STATUS }
-  else {
-    const payload = chanceList.reduce((map, payload) => {
-      const { firstCannot, neededOne } = payload
+  // 雖然沒有找到 ok 的組合，但有只差一顆的組合
+  const chanceResult = chanceList.reduce((list, chancePayload) => {
+    const { integrateCount, coreList, combinationCount } = chancePayload
+    const currentFirstSkillMap = Object.fromEntries(coreList.map((core) => [core.skills[0], true]))
 
-      const pkList = neededOne.sort((a, b) => a.localeCompare(b))
-      const pk = pkList.join(', ')
-      map[pk] = map[pk] || {
-        allAllow: false,
-        coreList: [],
-        firstCannotList: [],
-      }
+    const firstCanBeList = integrateCount.missOne.filter((missOneSkill) => !currentFirstSkillMap[missOneSkill])
 
-      map[pk].coreList.push(payload)
-      map[pk].allAllow = map[pk].allAllow || firstCannot == null
-      if (!map[pk].allAllow) map[pk].firstCannotList.push(firstCannot)
-      map[pk].firstCannotList = [...new Set(map[pk].firstCannotList)]
+    // 如果缺的技能都在第一個的話，代表雖然缺但也不行，就不推了、只推不是 0 的,
+    // 或是缺的技能數量少於 3 , 代表可以接受其他? TODO 這點目前還沒廣泛地測試
+    if (firstCanBeList.length !== 0 || integrateCount.missOne.length < 3) {
+      list.push({ firstCanBeList, integrateCount, coreList, combinationCount })
+    }
 
-      return map
-    }, {})
-    return { status: CHANCE_STATUS, payload }
-  }
+    return list
+  }, [])
+
+  // 不僅沒有找到 ok 的核心組合，也沒有只差一顆的組合
+  if (chanceResult.length === 0) return { status: FAILED_STATUS }
+
+  return { status: CHANCE_STATUS, payload: chanceResult }
 
   /**
    * @function _countSkillsOfEach
@@ -229,11 +238,21 @@ export function VMatrixCore(config) {
   // skills
   // required
   const id = v4()
-  Object.assign(this, { required: false, skills: [null, null, null] }, config, { id })
+  Object.assign(this, { required: false, skills: [null, null, null], validate: true }, config, { id })
   this.skills = this.skills.slice()
 
   return this
 }
+VMatrixCore.prototype.doValidate = function () {
+  this.validate = (() => {
+    const list = this.skills.filter((skill) => skill !== OTHER_SKILL_VALUE && skill != null)
+    const sameLength = list.length === [...new Set(list)].length
+
+    return sameLength
+  })()
+}
+export const OTHER_SKILL_VALUE = '________________________________________' // for unique
+export const OTHER_SKILL_LABEL = '其他'
 
 const LOCAL_STORAGE_KEY = 'maple-story-v-matrix-tool'
 export const CURRENT_JOB_KEY = 'CURRENT_JOB'

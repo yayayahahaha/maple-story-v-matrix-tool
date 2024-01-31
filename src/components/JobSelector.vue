@@ -1,5 +1,5 @@
 <template>
-  <el-select v-model="computedValue">
+  <el-select v-model="computedValue" :filterable="false /*TODO 為什麼不能刪除?*/">
     <el-option :value="FREE_JOB_TEXT" key="自由的" label="自由的" />
     <el-option-group v-for="group in optionGroup" :key="group.key" :label="group.groupName">
       <el-option v-for="job in group.jobs" :value="job.value" :key="job.key" :label="job.name" />

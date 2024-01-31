@@ -1,7 +1,13 @@
 <template>
   <el-row>
     <el-col>
-      <div v-for="(core, coreIndex) in computedValue" style="display: flex; margin-bottom: 12px" :key="core.id">
+      <div
+        v-for="(core, coreIndex) in computedValue"
+        style="display: flex; margin-bottom: 12px; padding: 3px"
+        :key="core.id"
+        class="core"
+        :class="{ error: !core.validate }"
+      >
         <el-button @change="$emit('core-update')" @click="requiredCore(core)" :type="core.required ? 'warning' : ''">{{
           core.required ? '已指定' : '指定'
         }}</el-button>
@@ -13,7 +19,7 @@
           v-model="core.skills[index]"
           placeholder="請選擇技能"
           :filterable="false /* TODO 輸入後無法刪除? */"
-          @change="$emit('core-update')"
+          @change="coreUpdate(core)"
         >
           <el-option
             v-for="(option, index) in options"
@@ -36,7 +42,7 @@
 </template>
 
 <script>
-import { VMatrixCore } from '../utils.js'
+import { VMatrixCore, OTHER_SKILL_VALUE } from '../utils.js'
 
 export default {
   name: 'CoreSelector',
@@ -60,7 +66,7 @@ export default {
 
   computed: {
     options() {
-      return this.skillOptions.flat().filter((option) => option.label !== '')
+      return [...this.skillOptions.filter((option) => option.label !== ''), { value: OTHER_SKILL_VALUE, label: '其他' }]
     },
 
     computedValue: {
@@ -68,15 +74,9 @@ export default {
         return this.modelValue
       },
       set(value) {
-        this.$emit('input', value)
+        this.$emit('update:modelValue', value)
       },
     },
-  },
-
-  watch: {},
-
-  created() {
-    if (this.computedValue.length < 1) this.add()
   },
 
   methods: {
@@ -93,9 +93,17 @@ export default {
     requiredCore(core) {
       core.required = !core.required
     },
+
+    coreUpdate(core) {
+      core.doValidate()
+      this.$emit('core-update')
+    },
   },
 }
 </script>
-
-<!-- TODO 刪除後的復原功能 -->
-<!-- TODO 存在 localStorage 裡的資料，避免重複輸入 -->
+<style scoped>
+.core.error {
+  border-radius: 5px;
+  background-color: var(--el-color-error-light-3);
+}
+</style>
