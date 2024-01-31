@@ -103,13 +103,12 @@ export function vMatrixTool(originList, targetSkills) {
     const { integrateCount, coreList, combinationCount } = chancePayload
     const currentFirstSkillMap = Object.fromEntries(coreList.map((core) => [core.skills[0], true]))
 
-    // TODO 這裡要檢查一下如果 first can be 是 0 個的話要挑掉，代表無法
     // TODO 還要考慮一下有'其他'的場景
     const firstCanBeList = integrateCount.missOne
       .map((missOneSkill) => (!currentFirstSkillMap[missOneSkill] ? missOneSkill : false))
       .filter(Boolean)
 
-    // 如果缺的技能都在第一個的話，代表雖然缺但也不行，就不推了、只推別的
+    // 如果缺的技能都在第一個的話，代表雖然缺但也不行，就不推了、只推不是 0 的
     if (firstCanBeList.length !== 0) list.push({ firstCanBeList, integrateCount, coreList, combinationCount })
 
     return list

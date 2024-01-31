@@ -3,7 +3,7 @@
     <h2>💥💥💥 好機會 💥💥💥</h2>
   </el-text>
 
-  <p>只要再開到下列核心，就可以完成技能組合:</p>
+  <p>只要再開到下列任一核心，就可以完成技能組合:</p>
   <div v-for="(missOneCore, index) in missOneCoreList" :key="`core-${index}`" style="margin-bottom: 12px">
     <el-tag
       style="margin-right: 12px"
@@ -16,17 +16,19 @@
     </el-tag>
 
     <!-- TODO 測試一下各種場景 -->
-    <span v-if="missOneCore.firstCanBeList.length === 0">，開頭可以是其中任一個技能</span>
-    <span v-else>，其中開頭不可以是</span>
-    <el-tag
-      style="margin-left: 12px"
-      :type="skillMap[skill].color.type"
-      :effect="skillMap[skill].color.effect"
-      v-for="(skill, skillIndex) in missOneCore.firstCanBeList"
-      :key="`core-${index}-skill-first-cannot-${skillIndex}`"
-    >
-      {{ skillMap[skill].label }}
-    </el-tag>
+    <span v-if="missOneCore.firstCanBeList.length === 3">，開頭可以是其中任一個技能</span>
+    <span v-else>
+      <span>，其中開頭<b>可以</b>是</span>
+      <el-tag
+        style="margin-left: 12px"
+        :type="skillMap[skill].color.type"
+        :effect="skillMap[skill].color.effect"
+        v-for="(skill, skillIndex) in missOneCore.firstCanBeList"
+        :key="`core-${index}-skill-first-cannot-${skillIndex}`"
+      >
+        {{ skillMap[skill].label }}
+      </el-tag>
+    </span>
 
     <span style="margin: 0 12px; color: var(--el-color-info)">|</span>
 
