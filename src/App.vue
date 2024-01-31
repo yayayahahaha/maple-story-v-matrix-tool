@@ -344,7 +344,7 @@ export default {
       })
       const formatSkillList = this.skills.filter((skill) => skill.label !== '').map((skill) => skill.value)
 
-      const result = vMatrixTool(formatCoreList, formatSkillList)
+      const result = vMatrixTool(formatCoreList, formatSkillList, { allowThreeSkills: this.allowThreeSkills })
       switch (result.status) {
         case SUCCESS_STATUS:
           this.passList = result.passList

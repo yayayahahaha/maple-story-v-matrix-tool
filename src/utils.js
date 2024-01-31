@@ -25,7 +25,9 @@ function test() {
 }
 false && test()
 
-export function vMatrixTool(originList, targetSkills) {
+export function vMatrixTool(originList, targetSkills, config) {
+  const { allowThreeSkills = true } = config
+
   // 全都整理成 VMatrixCore instance
   const list = originList.map((item) => {
     if (item instanceof VMatrixCore) return item
@@ -52,7 +54,7 @@ export function vMatrixTool(originList, targetSkills) {
 
   // 整理完畢，正式開始
 
-  // 過濾出需求技能數目的最低核心數目
+  // 過濾出需求技能數目的最低核心數目: 如果有要 1 個技能的話，也是要 2 顆核心
   const purpose = targetSkills.length === 1 ? 2 : Math.ceil((targetSkills.length * 2) / 3)
   const allCombinations = unFilteredCombinations.filter((skills) => skills.length === purpose)
 
@@ -64,7 +66,10 @@ export function vMatrixTool(originList, targetSkills) {
     const combinationCount = _countSkillsOfEach(combination)
 
     // 檢查是不是每個有需要的技能都有兩個
-    const successCombination = targetSkills.every((targetSkill) => combinationCount[targetSkill] >= 2)
+    const successCombination = targetSkills.every((targetSkill) => {
+      if (allowThreeSkills) return combinationCount[targetSkill] >= 2
+      return combinationCount[targetSkill] === 2
+    })
 
     if (successCombination) passList.push(combination)
   })
@@ -76,19 +81,35 @@ export function vMatrixTool(originList, targetSkills) {
 
   const chanceList = missOneList.reduce((chanceList, coreList) => {
     const combinationCount = _countSkillsOfEach(coreList)
+
     const integrateCount = targetSkills.reduce(
       (map, skill) => {
-        if (combinationCount[skill] >= 2) map.pass.push(skill)
+        // pass
+        if (combinationCount[skill] >= 2) {
+          if (allowThreeSkills) map.pass.push(skill)
+          else if (combinationCount[skill] === 2) map.pass.push(skill)
+          else map.over.push(skill)
+        }
+        // missOne
         else if (combinationCount[skill] === 1) map.missOne.push(skill)
+        // zero
         else map.zero.push(skill)
 
         return map
       },
-      { pass: [], missOne: [], zero: [] }
+      {
+        pass: [],
+        missOne: [],
+        zero: [],
+        over: [], // allowThreeSkills 是 false 的時候會有的
+      }
     )
 
-    const { missOne, zero } = integrateCount
-    if (missOne.length <= 3 && zero.length === 0) chanceList.push({ coreList, integrateCount, combinationCount })
+    const { missOne, zero, over } = integrateCount
+    if (missOne.length <= 3 && zero.length === 0 && over.length === 0) {
+      chanceList.push({ coreList, integrateCount, combinationCount })
+    }
+
     return chanceList
   }, [])
 
