@@ -1,6 +1,6 @@
 <template>
-  <span v-if="isOther" style="margin-right: 12px; color: var(--el-color-info-light-3)">{{ OTHER_SKILL_LABEL }}</span>
-  <el-tag v-else :type="type" :effect="effect" style="margin-right: 12px">
+  <span v-if="isOther" class="skill-item is-other">{{ OTHER_SKILL_LABEL }}</span>
+  <el-tag v-else :type="type" :effect="effect" class="skill-item">
     {{ label }}
   </el-tag>
 </template>
@@ -49,5 +49,10 @@ export default {
 </script>
 
 <style>
-/* TODO 如果不是最後一個的話才加的 margin-left  */
+.skill-item:not(:last-child) {
+  margin-right: 12px;
+}
+.skill-item.is-other {
+  color: var(--el-color-info-light-3);
+}
 </style>
