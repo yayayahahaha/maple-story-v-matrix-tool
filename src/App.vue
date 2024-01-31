@@ -13,11 +13,19 @@
           </el-form-item>
 
           <el-form-item label="我想要的技能是">
-            <skills-input
-              v-model="skills"
-              @skill-input-changed="skillInputChanged($event)"
-              @reset-skills="resetSkills"
-            />
+            <skills-input v-model="skills" @skill-input-changed="skillInputChanged($event)" />
+
+            <el-col v-if="skillHasSlot">
+              <el-row>
+                <allow-three-skills v-model="allowThreeSkills" />
+              </el-row>
+            </el-col>
+
+            <el-col>
+              <el-row>
+                <el-button type="primary" plain @click="resetSkills">重置</el-button>
+              </el-row>
+            </el-col>
           </el-form-item>
 
           <el-form-item label="我目前有的核心" />
@@ -52,12 +60,14 @@
 <script>
 import SkillsInput from './components/SkillsInput.vue'
 // TODO 有一個什麼奇怪的 eslint bug?
+
 import JobSelector from './components/JobSelector.vue'
 import CoreSelector from './components/CoreSelector.vue'
 import SuccessText from './components/SuccessText.vue'
 import FailedText from './components/FailedText.vue'
 import ChanceText from './components/ChanceText.vue'
 import Description from './components/Description.vue'
+import AllowThreeSkills from './components/AllowThreeSkills.vue'
 import { jobsMap, FREE_JOB_TEXT, SUCCESS_STATUS, FAILED_STATUS, CHANCE_STATUS } from './dictionary'
 import {
   VMatrixCore,
@@ -103,11 +113,14 @@ export default {
     FailedText,
     ChanceText,
     Description,
+    AllowThreeSkills,
   },
 
   data() {
     return {
       isLoading: false, // for simulate
+
+      allowThreeSkills: true,
 
       myJob: FREE_JOB_TEXT,
       skills: createSkillList(),
@@ -120,6 +133,11 @@ export default {
   },
 
   computed: {
+    skillHasSlot() {
+      const filledSkillListLength = this.skills.filter((skill) => skill.label).length
+      return Math.floor((filledSkillListLength * 2) / 3) !== Math.ceil((filledSkillListLength * 2) / 3)
+    },
+
     skillMap() {
       return Object.fromEntries(
         this.skills
