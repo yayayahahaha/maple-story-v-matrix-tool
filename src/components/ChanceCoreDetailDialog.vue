@@ -1,3 +1,5 @@
+<!-- TODO 這裡看要不要加上 "可以允許其他" 的資料呈現 -->
+
 <template>
   <el-dialog title="組合細節" v-model="computedValue" width="60%" @close="close">
     <div v-if="payload != null">
@@ -9,15 +11,33 @@
         </el-col>
 
         <el-col>
-          <el-row v-for="(core, coreIndex) in coreList" :key="`core-${coreIndex}`" style="margin-bottom: 12px">
-            <span style="margin-right: 12px">{{ `第 ${coreIndex + 1} 顆` }}</span>
-            <skill-tag
-              v-for="(skill, skillIndex) in core.skills"
-              :skill="skill"
-              :skill-map="skillMap"
-              :key="`core-${coreIndex}-${skillIndex}`"
-            />
-          </el-row>
+          <el-table :data="coreList" border>
+            <el-table-column type="index" width="50" />
+
+            <el-table-column label="是否指定" width="120px">
+              <template #default="scope">
+                <span
+                  style="margin-right: 6px"
+                  :class="{
+                    'core-required': scope.row.required,
+                  }"
+                  v-text="scope.row.required ? '已指定' : '未指定'"
+                >
+                </span>
+              </template>
+            </el-table-column>
+
+            <el-table-column label="技能組合">
+              <template #default="scope">
+                <skill-tag
+                  v-for="(skill, skillIndex) in scope.row.skills"
+                  :skill="skill"
+                  :skill-map="skillMap"
+                  :key="`core-${scope.row.$index}-${skillIndex}`"
+                />
+              </template>
+            </el-table-column>
+          </el-table>
         </el-col>
       </el-row>
 
@@ -149,6 +169,10 @@ export default {
 <style scoped>
 .count-is-one {
   color: var(--el-color-error);
+  font-weight: bold;
+}
+.core-required {
+  color: var(--el-color-warning);
   font-weight: bold;
 }
 </style>

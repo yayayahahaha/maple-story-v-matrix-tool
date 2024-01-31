@@ -15,7 +15,6 @@
       {{ skillMap[skill].label }}
     </el-tag>
 
-    <!-- TODO 測試一下各種場景 -->
     <span v-if="missOneCore.firstCanBeList.length === 3">，開頭可以是其中任一個技能</span>
     <span v-else>
       <span>，其中開頭<b>可以</b>是</span>
@@ -32,7 +31,6 @@
 
     <span style="margin: 0 12px; color: var(--el-color-info)">|</span>
 
-    <!-- TODO 還沒處理 -->
     <el-link @click="showDetail(missOneCore)">查看細節</el-link>
   </div>
 
