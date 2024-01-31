@@ -347,7 +347,10 @@ export default {
       const result = vMatrixTool(formatCoreList, formatSkillList, { allowThreeSkills: this.allowThreeSkills })
       switch (result.status) {
         case SUCCESS_STATUS:
-          this.passList = result.passList
+          // do duplicate avoid sync update
+          this.passList = result.passList.map((coreList) => {
+            return coreList.map((core) => new VMatrixCore({ ...core, skills: core.skills.slice() }))
+          })
           break
 
         case FAILED_STATUS:
