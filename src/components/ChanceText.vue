@@ -31,13 +31,19 @@
     <span style="margin: 0 12px; color: var(--el-color-info)">|</span>
 
     <!-- TODO 還沒處理 -->
-    <el-link>查看細節</el-link>
+    <el-link @click="showDetail(missOneCore)">查看細節</el-link>
   </div>
+
+  <chance-core-detail-dialog v-model="changeDetailVisible" :payload="missOneCorePayload" :skill-map="skillMap" />
 </template>
 
 <script>
+import ChanceCoreDetailDialog from './ChanceCoreDetailDialog.vue'
+
 export default {
   name: 'ChanceText',
+
+  components: { ChanceCoreDetailDialog },
 
   props: {
     chancePayload: {
@@ -51,9 +57,23 @@ export default {
     },
   },
 
+  data() {
+    return {
+      changeDetailVisible: false,
+      missOneCorePayload: null,
+    }
+  },
+
   computed: {
     missOneCoreList() {
       return this.chancePayload
+    },
+  },
+
+  methods: {
+    showDetail(missOneCore) {
+      this.changeDetailVisible = true
+      this.missOneCorePayload = missOneCore
     },
   },
 }

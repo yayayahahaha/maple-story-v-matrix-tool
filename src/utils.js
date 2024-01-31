@@ -25,10 +25,6 @@ function test() {
 }
 false && test()
 
-// TODO 大改:
-// NEXT 這裡要大改: 改成傳入 coreList 和 skillList
-// 核心數目用 skillList / 3 處理, 主要方法為不用 count 去算，要去逐一檢查每個 skill 是不是有包含兩個
-// 少一的情況要用是不是是剛好是 count 1 的都是我們要用的 skill, 也要看是不是其他的 skill 都是 2
 export function vMatrixTool(originList, targetSkills) {
   // 全都整理成 VMatrixCore instance
   const list = originList.map((item) => {
@@ -92,7 +88,7 @@ export function vMatrixTool(originList, targetSkills) {
     )
 
     const { missOne, zero } = integrateCount
-    if (missOne.length <= 3 && zero.length === 0) chanceList.push({ coreList, integrateCount })
+    if (missOne.length <= 3 && zero.length === 0) chanceList.push({ coreList, integrateCount, combinationCount })
     return chanceList
   }, [])
 
@@ -107,7 +103,7 @@ export function vMatrixTool(originList, targetSkills) {
   // TODO 有其他，差的那顆是其他的 (這個應該不會有
   // 雖然沒有找到 ok 的組合，但有只差一顆的組合
   const chanceResult = chanceList.reduce((list, chancePayload) => {
-    const { integrateCount, coreList } = chancePayload
+    const { integrateCount, coreList, combinationCount } = chancePayload
     const currentFirstSkillMap = Object.fromEntries(coreList.map((core) => [core.skills[0], true]))
 
     // TODO 這裡要檢查一下如果 first cannot be 是 3 個的話要挑掉，代表無法
@@ -117,7 +113,7 @@ export function vMatrixTool(originList, targetSkills) {
       .filter(Boolean)
 
     // 如果缺的技能都在第一個的話，代表雖然缺但也不行，就不推了、只推別的
-    if (firstCanBeList.length !== 3) list.push({ firstCanBeList, integrateCount, coreList })
+    if (firstCanBeList.length !== 3) list.push({ firstCanBeList, integrateCount, coreList, combinationCount })
 
     return list
   }, [])

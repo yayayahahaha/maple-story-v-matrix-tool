@@ -118,6 +118,7 @@ export default {
   },
 
   computed: {
+    // TODO 改成 store?
     skillMap() {
       return Object.fromEntries(this.skills.map((skill) => [skill.value, skill]))
     },
@@ -313,9 +314,7 @@ export default {
       })
       const formatSkillList = this.skills.filter((skill) => skill.label !== '').map((skill) => skill.value)
 
-      // TODO 這裡要改掉，大改
       const result = vMatrixTool(formatCoreList, formatSkillList)
-
       switch (result.status) {
         case SUCCESS_STATUS:
           this.passList = result.passList
