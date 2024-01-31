@@ -82,9 +82,9 @@ export function vMatrixTool(originList, targetSkills) {
     const combinationCount = _countSkillsOfEach(coreList)
     const integrateCount = targetSkills.reduce(
       (map, skill) => {
-        if (combinationCount[skill] >= 2) map.pass.push(coreList)
-        else if (combinationCount[skill] === 1) map.missOne.push(coreList)
-        else map.zero.push(coreList)
+        if (combinationCount[skill] >= 2) map.pass.push(skill)
+        else if (combinationCount[skill] === 1) map.missOne.push(skill)
+        else map.zero.push(skill)
 
         return map
       },
@@ -92,22 +92,37 @@ export function vMatrixTool(originList, targetSkills) {
     )
 
     const { missOne, zero } = integrateCount
-    if (missOne.length <= 3 && zero.length === 0) chanceList.push(coreList)
+    if (missOne.length <= 3 && zero.length === 0) chanceList.push({ coreList, integrateCount })
     return chanceList
   }, [])
 
+  // 不僅沒有找到 ok 的核心組合，也沒有只差一顆的組合
   if (chanceList.length === 0) return { status: FAILED_STATUS }
-  else {
-    // TODO 這些都是在那種 4 核 5 技
-    // TODO 沒有其他，差的那顆也沒有其他的
-    // TODO 沒有其他，差的那顆是其他的
-    // TODO 有其他，差的那顆不是其他的
-    // TODO 有其他，差的那顆是其他的 (這個應該不會有
-    console.log('好機會')
-    console.log(JSON.parse(JSON.stringify(chanceList, null, 2)))
 
-    return {}
-  }
+  // TODO 特殊場景:
+  // TODO 在那種 4 核 5 技有差一顆的:
+  // TODO 沒有其他，差的那顆也沒有其他的
+  // TODO 沒有其他，差的那顆是其他的
+  // TODO 有其他，差的那顆不是其他的
+  // TODO 有其他，差的那顆是其他的 (這個應該不會有
+  // 雖然沒有找到 ok 的組合，但有只差一顆的組合
+  const chanceResult = chanceList.reduce((list, chancePayload) => {
+    const { integrateCount, coreList } = chancePayload
+    const currentFirstSkillMap = Object.fromEntries(coreList.map((core) => [core.skills[0], true]))
+
+    // TODO 這裡要檢查一下如果 first cannot be 是 3 個的話要挑掉，代表無法
+    // TODO 還要考慮一下有'其他'的場景
+    const firstCanBeList = integrateCount.missOne
+      .map((missOneSkill) => (!currentFirstSkillMap[missOneSkill] ? missOneSkill : false))
+      .filter(Boolean)
+
+    // 如果缺的技能都在第一個的話，代表雖然缺但也不行，就不推了、只推別的
+    if (firstCanBeList.length !== 3) list.push({ firstCanBeList, integrateCount, coreList })
+
+    return list
+  }, [])
+
+  return { status: CHANCE_STATUS, payload: chanceResult }
 
   /**
    * @function _countSkillsOfEach

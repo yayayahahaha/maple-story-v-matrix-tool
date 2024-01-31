@@ -24,6 +24,8 @@
           >
         </el-text>
       </el-col>
+
+      <!-- TODO 核心未滿的情況下，可不可以接受有技能是站了 3 位子的 checkbox 和 example 提示 -->
     </el-row>
 
     <el-button type="primary" plain @click="$emit('reset-skills')">重置</el-button>
@@ -51,6 +53,7 @@ export default {
       },
     },
 
+    // TODO 這裡要改寫一下: 如果只想要兩個技能的話，可能會出問題
     coreCount() {
       return Math.ceil((this.skillCount * 2) / 3)
     },

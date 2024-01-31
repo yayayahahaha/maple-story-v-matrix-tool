@@ -9,23 +9,29 @@
       style="margin-right: 12px"
       :type="skillMap[skill].color.type"
       :effect="skillMap[skill].color.effect"
-      v-for="(skill, skillIndex) in missOneCore.skills"
+      v-for="(skill, skillIndex) in missOneCore.integrateCount.missOne"
       :key="`core-${index}-skill-${skillIndex}`"
     >
       {{ skillMap[skill].label }}
     </el-tag>
 
-    <span v-if="missOneCore.allAllow">，開頭可以是其中任一個技能</span>
+    <!-- TODO 測試一下各種場景 -->
+    <span v-if="missOneCore.firstCanBeList.length === 0">，開頭可以是其中任一個技能</span>
     <span v-else>，其中開頭不可以是</span>
     <el-tag
       style="margin-left: 12px"
       :type="skillMap[skill].color.type"
       :effect="skillMap[skill].color.effect"
-      v-for="(skill, skillIndex) in missOneCore.firstCannotList"
+      v-for="(skill, skillIndex) in missOneCore.firstCanBeList"
       :key="`core-${index}-skill-first-cannot-${skillIndex}`"
     >
       {{ skillMap[skill].label }}
     </el-tag>
+
+    <span style="margin: 0 12px; color: var(--el-color-info)">|</span>
+
+    <!-- TODO 還沒處理 -->
+    <el-link>查看細節</el-link>
   </div>
 </template>
 
@@ -47,11 +53,7 @@ export default {
 
   computed: {
     missOneCoreList() {
-      return Object.keys(this.chancePayload).map((skillsKey) => {
-        const { firstCannotList, coreList, allAllow } = this.chancePayload[skillsKey]
-        const skills = coreList[0].neededOne
-        return { allAllow, skills, firstCannotList }
-      })
+      return this.chancePayload
     },
   },
 }
