@@ -10,13 +10,18 @@
         在選擇職業後如果想客製化，也可以根據自身喜好手動調整想要的技能組。
       </h5>
       <h5>
-        註2: 凱殷的技能組較為特別，參考了巴哈<a href="https://forum.gamer.com.tw/C.php?bsn=7650&snA=1024022">麒麟</a
+        註2: 凱殷的技能組較為特別，參考了巴哈<a
+          target="_blank"
+          href="https://forum.gamer.com.tw/C.php?bsn=7650&snA=1024022"
+          >麒麟</a
         >的文章
       </h5>
       <h5>
-        註3: 亞克和神之子全部的技能都要用到，參考了巴哈<a href="https://forum.gamer.com.tw/C.php?bsn=7650&snA=993338"
+        註3: 亞克和神之子全部的技能都要用到，參考了巴哈<a
+          target="_blank"
+          href="https://forum.gamer.com.tw/C.php?bsn=7650&snA=993338"
           >阿翔 </a
-        >的文章與討論
+        >的文章與討論。由於我沒有練也沒有去複製技能組合，所以裡面是空的。
       </h5>
       <h5>
         註4: 「<span class="red">指定</span
