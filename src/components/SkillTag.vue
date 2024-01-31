@@ -1,5 +1,3 @@
-<!-- TODO 檢查一下哪裡還有沒有整理過來的 skill-tag -->
-
 <template>
   <span v-if="isOther" style="margin-right: 12px; color: var(--el-color-info-light-3)">{{ OTHER_SKILL_LABEL }}</span>
   <el-tag v-else :type="type" :effect="effect" style="margin-right: 12px">

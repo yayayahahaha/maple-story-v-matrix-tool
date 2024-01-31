@@ -1,6 +1,5 @@
 <template>
   <el-checkbox v-model="computedValue" label="允許單一技能重複出現 3 次" />
-  <!-- TODO 還沒做範例 -->
   <el-button :text="true" style="margin-left: 12px" @click="showExample">範例</el-button>
 
   <el-dialog title="允許單一技能重複出現 3 次範例" v-model="showExampleVisible" width="60%">

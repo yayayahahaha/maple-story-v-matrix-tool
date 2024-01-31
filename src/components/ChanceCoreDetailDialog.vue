@@ -1,5 +1,3 @@
-<!-- TODO 這裡看要不要加上 "可以允許其他" 的資料呈現 -->
-
 <template>
   <el-dialog title="組合細節" v-model="computedValue" width="60%" @close="close">
     <div v-if="payload != null">

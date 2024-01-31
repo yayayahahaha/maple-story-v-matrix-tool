@@ -59,8 +59,6 @@
 
 <script>
 import SkillsInput from './components/SkillsInput.vue'
-// TODO 有一個什麼奇怪的 eslint bug?
-
 import JobSelector from './components/JobSelector.vue'
 import CoreSelector from './components/CoreSelector.vue'
 import SuccessText from './components/SuccessText.vue'

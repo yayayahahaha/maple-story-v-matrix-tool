@@ -92,13 +92,6 @@ export function vMatrixTool(originList, targetSkills) {
     return chanceList
   }, [])
 
-  // TODO 特殊場景:
-  // TODO 在那種 4 核 5 技有差一顆的:
-  // TODO 沒有其他，差的那顆也沒有其他的
-  // TODO 沒有其他，差的那顆是其他的
-  // TODO 有其他，差的那顆不是其他的
-  // TODO 有其他，差的那顆是其他的 (這個應該不會有
-
   // 雖然沒有找到 ok 的組合，但有只差一顆的組合
   const chanceResult = chanceList.reduce((list, chancePayload) => {
     const { integrateCount, coreList, combinationCount } = chancePayload
@@ -107,7 +100,7 @@ export function vMatrixTool(originList, targetSkills) {
     const firstCanBeList = integrateCount.missOne.filter((missOneSkill) => !currentFirstSkillMap[missOneSkill])
 
     // 如果缺的技能都在第一個的話，代表雖然缺但也不行，就不推了、只推不是 0 的,
-    // 或是缺的技能數量少於 3 , 代表可以接受其他? TODO 這點目前還沒找到測試資料
+    // 或是缺的技能數量少於 3 , 代表可以接受其他? TODO 這點目前還沒廣泛地測試
     if (firstCanBeList.length !== 0 || integrateCount.missOne.length < 3) {
       list.push({ firstCanBeList, integrateCount, coreList, combinationCount })
     }
