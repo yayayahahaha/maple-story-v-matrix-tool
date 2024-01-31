@@ -51,6 +51,7 @@
 
 <script>
 import SkillsInput from './components/SkillsInput.vue'
+// TODO 有一個什麼奇怪的 eslint bug?
 import JobSelector from './components/JobSelector.vue'
 import CoreSelector from './components/CoreSelector.vue'
 import SuccessText from './components/SuccessText.vue'
@@ -66,6 +67,7 @@ import {
   getLocalStorageData,
   saveLocalStorageData,
   OTHER_SKILL_VALUE,
+  OTHER_SKILL_LABEL,
 } from './utils'
 
 const COLOR_SET = [
@@ -118,9 +120,21 @@ export default {
   },
 
   computed: {
-    // TODO 改成 store?
     skillMap() {
-      return Object.fromEntries(this.skills.map((skill) => [skill.value, skill]))
+      return Object.fromEntries(
+        this.skills
+          .map((skill) => [skill.value, skill])
+          .concat([
+            [
+              OTHER_SKILL_VALUE,
+              {
+                color: {},
+                label: OTHER_SKILL_LABEL,
+                value: OTHER_SKILL_VALUE,
+              },
+            ],
+          ])
+      )
     },
   },
 

@@ -1,3 +1,5 @@
+<!-- TODO 會有出現成功以後、去"更換"技能的話會導致顯示出錯的部分 -->
+
 <template>
   <el-text type="danger">
     <h1>🎉🎉🎉 你成功啦 🎉🎉🎉</h1>
@@ -5,24 +7,21 @@
 
   <div v-for="(combination, index) in passList" :key="index" style="margin-bottom: 12px">
     <div v-for="(core, coreIndex) in combination" :key="coreIndex" style="margin-bottom: 12px">
-      <span>{{ `第 ${coreIndex + 1} 顆` }}</span>
-      <el-tag
-        v-for="(skill, skillIndex) in core.skills"
-        :type="skillMap[skill].color.type"
-        :effect="skillMap[skill].color.effect"
-        style="margin-left: 12px"
-        :key="skillIndex"
-      >
-        {{ skillMap[skill].label }}
-      </el-tag>
+      <span style="margin-right: 12px">{{ `第 ${coreIndex + 1} 顆` }}</span>
+
+      <skill-tag v-for="skill in core.skills" :key="skill" :skill="skill" :skill-map="skillMap" />
     </div>
     <el-divider v-if="index + 1 !== passList.length" />
   </div>
 </template>
 
 <script>
+import SkillTag from './SkillTag.vue'
+
 export default {
   name: 'SuccessText',
+
+  components: { SkillTag },
 
   props: {
     passList: {

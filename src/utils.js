@@ -114,6 +114,8 @@ export function vMatrixTool(originList, targetSkills) {
     return list
   }, [])
 
+  console.log('chanceResult:', chanceResult)
+
   // 不僅沒有找到 ok 的核心組合，也沒有只差一顆的組合
   if (chanceResult.length === 0) return { status: FAILED_STATUS }
 
@@ -237,6 +239,7 @@ VMatrixCore.prototype.doValidate = function () {
   })()
 }
 export const OTHER_SKILL_VALUE = '________________________________________' // for unique
+export const OTHER_SKILL_LABEL = '其他'
 
 const LOCAL_STORAGE_KEY = 'maple-story-v-matrix-tool'
 export const CURRENT_JOB_KEY = 'CURRENT_JOB'
